@@ -11,4 +11,4 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - run: make install
-      - run: gh activity-report -d 7..3
+      - run: gh activity-report --author srz-zumix -d 7..3
