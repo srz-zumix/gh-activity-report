@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)
+# SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)
 
 GH_AR_VERSION=0.1
 DATE_TYPE=
@@ -45,6 +45,7 @@ die() {
 }
 
 usage() {
+    # shellcheck disable=SC1078
     die "gh-activity-report version ${GH_AR_VERSION}
 
   -h, --help                            Show help
@@ -52,7 +53,7 @@ usage() {
   -l, --limit        number             Maximum number of results to fetch
       --owner        string             Filter on repository owner
   -R, --repo         [HOST/]OWNER/REPO  Specify search target
-      --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default "updated")
+      --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default \"updated\")
 
 account filter: default --auther @me, if not specified bellow
   --assignee         string             Filter by assignee
@@ -120,9 +121,9 @@ parse_params() {
             shift ;;
         --days-ago| -d )
             DAYS_AGO="${2-}"
-            DAYS_AGO_SINCE=${DAYS_AGO%%..*}
-            DAYS_AGO_UNTIL_=${DAYS_AGO#${DAYS_AGO_SINCE}}
-            DAYS_AGO_UNTIL=${DAYS_AGO_UNTIL_##*..}
+            DAYS_AGO_SINCE="${DAYS_AGO%%..*}"
+            DAYS_AGO_UNTIL_="${DAYS_AGO#${DAYS_AGO_SINCE}}"
+            DAYS_AGO_UNTIL="${DAYS_AGO_UNTIL_##*..}"
             if [ -n "${DAYS_AGO_SINCE}" ]; then
                 SINCE=$(date_day "-${DAYS_AGO_SINCE}")
             fi
@@ -182,7 +183,7 @@ parse_params() {
             ;;
         --)
             shift
-            BYPASS_OPTIONS=($@)
+            BYPASS_OPTIONS=("$@")
             break ;;
         *) break ;;
         esac
@@ -224,8 +225,8 @@ else
     fi
 fi
 if [ -n "${DATE_QUERY}" ]; then
-    GH_PRS_OPTIONS+=(--${PRS_DATE_FILTER} "${DATE_QUERY}")
-    GH_ISSUES_OPTIONS+=(--${ISSUES_DATE_FILTER} "${DATE_QUERY}")
+    GH_PRS_OPTIONS+=("--${PRS_DATE_FILTER}" "${DATE_QUERY}")
+    GH_ISSUES_OPTIONS+=("--${ISSUES_DATE_FILTER}" "${DATE_QUERY}")
 fi
 
 # account filter
