@@ -6,6 +6,10 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)
 GH_AR_VERSION=0.1
 DATE_TYPE=
 
+if [ -n "${GH_ACTIVITY_REPORT_DEBUG:-}" ]; then
+    set -x
+fi
+
 date_detect() {
     if [ -z "${DATE_TYPE}" ]; then
         date --version > /dev/null 2>&1 && DATE_TYPE="GNU" || DATE_TYPE="BSD"
@@ -45,27 +49,33 @@ usage() {
 
   -h, --help                            Show help
       --version                         Show version
-  -l, --limit     number                Maximum number of results to fetch
-      --owner     string                Filter on repository owner
-  -R, --repo      [HOST/]OWNER/REPO     Specify search target
+  -l, --limit        number             Maximum number of results to fetch
+      --owner        string             Filter on repository owner
+  -R, --repo         [HOST/]OWNER/REPO  Specify search target
+      --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default "updated")
 
 account filter: default --auther @me, if not specified bellow
-  --assignee      string                Filter by assignee
-  --author        string                Filter by author
-  --involves      string                Filter based on involvement of user
-  --mentions      string                Filter based on user mentions
-  --commenter     string                Filter based on comments by user
+  --assignee         string             Filter by assignee
+  --author           string             Filter by author
+  --involves         string             Filter based on involvement of user
+  --mentions         string             Filter based on user mentions
+  --commenter        string             Filter based on comments by user
+  --review-requested string             Filter based on comments by user
+  --reviewed-by      string             Filter on user who reviewed
 
 date range:
-  -d, --days-ago  since(..until)        Specify the period to filter n days ago
-      --since     yyyy-mm-dd            Start date to filter by date
-      --until     yyyy-mm-dd            End date to filter by date
+  -d, --days-ago     since(..until)     Specify the period to filter n days ago
+      --since        yyyy-mm-dd         Start date to filter by date
+      --until        yyyy-mm-dd         End date to filter by date
 
 date filter:
   --created                             Filter based on created at date
   --closed                              Filter on closed at date
   --merged                              Filter on merged at date
   --updated                             Filter on last updated at date
+
+pull_request filter:
+  --draft                               Filter based on draft state
 " "$1"
 }
 
@@ -78,11 +88,16 @@ parse_params() {
     INVOLVES=
     MENTIONS=
     COMMENTER=
+    REVIEW_REQUESTED=
+    REVIEWED_BY=
     PRS_DATE_FILTER=updated
     ISSUES_DATE_FILTER=updated
+    DRAFT=
     LIMIT=
     OWNER=
     REPO=
+    SORT=updated
+    SEARCH_ISSUES=true
 
     while :; do
         case "${1-}" in
@@ -115,6 +130,10 @@ parse_params() {
                 UNTIL=$(date_day "-${DAYS_AGO_UNTIL}")
             fi
             shift ;;
+        --draft )
+            DRAFT=true
+            SEARCH_ISSUES=false
+            ;;
         --involves)
             INVOLVES="${2-}"
             shift ;;
@@ -126,7 +145,7 @@ parse_params() {
             shift ;;
         --merged )
             PRS_DATE_FILTER=merged-at
-            ISSUES_DATE_FILTER=closed
+            SEARCH_ISSUES=false
             ;;
         --owner )
             OWNER="${2-}"
@@ -134,8 +153,19 @@ parse_params() {
         --repo| -R )
             REPO="${2-}"
             shift ;;
+        --review-requested)
+            REVIEW_REQUESTED="${2-}"
+            SEARCH_ISSUES=false
+            shift ;;
+        --reviewed-by)
+            REVIEWED_BY="${2-}"
+            SEARCH_ISSUES=false
+            shift ;;
         --since )
             SINCE="${2-}"
+            shift ;;
+        --sort )
+            SORT="${2-}"
             shift ;;
         --until )
             UNTIL="${2-}"
@@ -176,6 +206,9 @@ fi
 if [ -n "${REPO}" ]; then
     GH_OPTIONS+=(--repo "${REPO}")
 fi
+if [ -n "${SORT}" ]; then
+    GH_OPTIONS+=(--sort "${SORT}")
+fi
 
 # date filter
 DATE_QUERY=
@@ -196,7 +229,7 @@ if [ -n "${DATE_QUERY}" ]; then
 fi
 
 # account filter
-if [ -z "${AUTHOR}${ASSIGNEE}${INVOLVES}${MENTIONS}${COMMENTER}" ]; then
+if [ -z "${AUTHOR}${ASSIGNEE}${INVOLVES}${MENTIONS}${COMMENTER}${REVIEW_REQUESTED}${REVIEWED_BY}" ]; then
     AUTHOR="@me"
 fi
 if [ -n "${AUTHOR}" ]; then
@@ -214,9 +247,19 @@ fi
 if [ -n "${COMMENTER}" ]; then
     GH_OPTIONS+=(--commenter "${COMMENTER}")
 fi
-
-if [ -n "${GH_ACTIVITY_REPORT_DEBUG:-}" ]; then
-    set -x
+if [ -n "${REVIEW_REQUESTED}" ]; then
+    GH_OPTIONS+=(--review-requested "${REVIEW_REQUESTED}")
 fi
+if [ -n "${REVIEWED_BY}" ]; then
+    GH_OPTIONS+=(--reviewed-by "${REVIEWED_BY}")
+fi
+
+# pull_request filter
+if [ -n "${DRAFT}" ]; then
+    GH_PRS_OPTIONS+=(--draft)
+fi
+
 gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
-gh search issues "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
+if ${SEARCH_ISSUES}; then
+    gh search issues "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
+fi
