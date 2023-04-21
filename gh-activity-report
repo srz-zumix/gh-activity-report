@@ -41,7 +41,32 @@ die() {
 }
 
 usage() {
-    die "gh-activity-report version ${GH_AR_VERSION}"
+    die "gh-activity-report version ${GH_AR_VERSION}
+
+  -h, --help                            Show help
+      --version                         Show version
+  -l, --limit     number                Maximum number of results to fetch
+      --owner     string                Filter on repository owner
+  -R, --repo      [HOST/]OWNER/REPO     Specify search target
+
+account filter: default --auther @me, if not specified bellow
+  --assignee      string                Filter by assignee
+  --author        string                Filter by author
+  --involves      string                Filter based on involvement of user
+  --mentions      string                Filter based on user mentions
+  --commenter     string                Filter based on comments by user
+
+date range:
+  -d, --days-ago  since(..until)        Specify the period to filter n days ago
+      --since     yyyy-mm-dd            Start date to filter by date
+      --until     yyyy-mm-dd            End date to filter by date
+
+date filter:
+  --created                             Filter based on created at date
+  --closed                              Filter on closed at date
+  --merged                              Filter on merged at date
+  --updated                             Filter on last updated at date
+" "$1"
 }
 
 parse_params() {
@@ -55,6 +80,8 @@ parse_params() {
     COMMENTER=
     PRS_DATE_FILTER=updated
     ISSUES_DATE_FILTER=updated
+    LIMIT=
+    OWNER=
     REPO=
 
     while :; do
@@ -78,18 +105,32 @@ parse_params() {
             shift ;;
         --days-ago| -d )
             DAYS_AGO="${2-}"
-            SINCE=$(date_day "-${2-}")
+            DAYS_AGO_SINCE=${DAYS_AGO%%..*}
+            DAYS_AGO_UNTIL_=${DAYS_AGO#${DAYS_AGO_SINCE}}
+            DAYS_AGO_UNTIL=${DAYS_AGO_UNTIL_##*..}
+            if [ -n "${DAYS_AGO_SINCE}" ]; then
+                SINCE=$(date_day "-${DAYS_AGO_SINCE}")
+            fi
+            if [ -n "${DAYS_AGO_UNTIL}" ]; then
+                UNTIL=$(date_day "-${DAYS_AGO_UNTIL}")
+            fi
             shift ;;
         --involves)
             INVOLVES="${2-}"
+            shift ;;
+        --limit| -l )
+            LIMIT="${2-}"
             shift ;;
         --mentions)
             MENTIONS="${2-}"
             shift ;;
         --merged )
-            PRS_DATE_FILTER=merged
+            PRS_DATE_FILTER=merged-at
             ISSUES_DATE_FILTER=closed
             ;;
+        --owner )
+            OWNER="${2-}"
+            shift ;;
         --repo| -R )
             REPO="${2-}"
             shift ;;
@@ -105,6 +146,9 @@ parse_params() {
             ;;
         --version )
             echo "gh-activity-report version ${GH_AR_VERSION}"
+            ;;
+        --help| -h )
+            usage 0
             ;;
         --)
             shift
@@ -123,6 +167,12 @@ declare -a GH_OPTIONS
 declare -a GH_PRS_OPTIONS
 declare -a GH_ISSUES_OPTIONS
 
+if [ -n "${LIMIT}" ]; then
+    GH_OPTIONS+=(--limit "${LIMIT}")
+fi
+if [ -n "${OWNER}" ]; then
+    GH_OPTIONS+=(--owner "${OWNER}")
+fi
 if [ -n "${REPO}" ]; then
     GH_OPTIONS+=(--repo "${REPO}")
 fi
@@ -165,5 +215,8 @@ if [ -n "${COMMENTER}" ]; then
     GH_OPTIONS+=(--commenter "${COMMENTER}")
 fi
 
+if [ -n "${GH_ACTIVITY_REPORT_DEBUG:-}" ]; then
+    set -x
+fi
 gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
 gh search issues "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
