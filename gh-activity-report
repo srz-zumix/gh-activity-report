@@ -258,7 +258,8 @@ if [ -n "${REVIEWED_BY}" ]; then
     GH_OPTIONS+=(--reviewed-by "${REVIEWED_BY}")
 fi
 
-gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
 if ${SEARCH_ISSUES}; then
-    gh search issues "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
+    gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
+else
+    gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
 fi
