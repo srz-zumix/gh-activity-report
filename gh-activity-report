@@ -122,7 +122,7 @@ parse_params() {
         --days-ago| -d )
             DAYS_AGO="${2-}"
             DAYS_AGO_SINCE="${DAYS_AGO%%..*}"
-            DAYS_AGO_UNTIL_="${DAYS_AGO#${DAYS_AGO_SINCE}}"
+            DAYS_AGO_UNTIL_="${DAYS_AGO#"${DAYS_AGO_SINCE}"}"
             DAYS_AGO_UNTIL="${DAYS_AGO_UNTIL_##*..}"
             if [ -n "${DAYS_AGO_SINCE}" ]; then
                 SINCE=$(date_day "-${DAYS_AGO_SINCE}")
