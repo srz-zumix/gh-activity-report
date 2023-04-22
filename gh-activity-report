@@ -54,6 +54,7 @@ usage() {
       --owner        string             Filter on repository owner
   -R, --repo         [HOST/]OWNER/REPO  Specify search target
       --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default \"updated\")
+  -w, --web                             Open the search query in the web browser
 
 account filter: default --auther @me, if not specified bellow
   --assignee         string             Filter by assignee
@@ -80,6 +81,10 @@ pull_request filter:
 " "$1"
 }
 
+declare -a GH_OPTIONS
+declare -a GH_PRS_OPTIONS
+declare -a GH_ISSUES_OPTIONS
+
 parse_params() {
     # default values of variables set from params
     SINCE=
@@ -93,7 +98,6 @@ parse_params() {
     REVIEWED_BY=
     PRS_DATE_FILTER=updated
     ISSUES_DATE_FILTER=updated
-    DRAFT=
     LIMIT=
     OWNER=
     REPO=
@@ -132,7 +136,7 @@ parse_params() {
             fi
             shift ;;
         --draft )
-            DRAFT=true
+            GH_PRS_OPTIONS+=(--draft)
             SEARCH_ISSUES=false
             ;;
         --involves)
@@ -175,6 +179,9 @@ parse_params() {
             PRS_DATE_FILTER=updated
             ISSUES_DATE_FILTER=updated
             ;;
+        --web| -w )
+            GH_OPTIONS+=(--web)
+            ;;
         --version )
             echo "gh-activity-report version ${GH_AR_VERSION}"
             ;;
@@ -193,10 +200,6 @@ parse_params() {
 }
 
 parse_params "$@"
-
-declare -a GH_OPTIONS
-declare -a GH_PRS_OPTIONS
-declare -a GH_ISSUES_OPTIONS
 
 if [ -n "${LIMIT}" ]; then
     GH_OPTIONS+=(--limit "${LIMIT}")
@@ -253,11 +256,6 @@ if [ -n "${REVIEW_REQUESTED}" ]; then
 fi
 if [ -n "${REVIEWED_BY}" ]; then
     GH_OPTIONS+=(--reviewed-by "${REVIEWED_BY}")
-fi
-
-# pull_request filter
-if [ -n "${DRAFT}" ]; then
-    GH_PRS_OPTIONS+=(--draft)
 fi
 
 if ${SEARCH_ISSUES}; then
