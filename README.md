@@ -8,6 +8,12 @@ lists pull requests and issues that can be specified by the date of the differen
 gh extension install srz-zumix/gh-activity-report
 ```
 
+recommend
+
+```sh
+gh alias set ar activity-report
+```
+
 ## Usage
 
 ### List of pull requests and issues created in the last 7 days
@@ -21,3 +27,37 @@ gh activity-report -d 7
 ```sh
 gh activity-report --involves "@me" -d 7..3
 ```
+
+## Options
+
+```text
+  -h, --help                            Show help
+      --version                         Show version
+  -l, --limit        number             Maximum number of results to fetch
+      --owner        string             Filter on repository owner
+  -R, --repo         [HOST/]OWNER/REPO  Specify search target
+      --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default "updated")
+
+account filter: default --auther @me, if not specified bellow
+  --assignee         string             Filter by assignee
+  --author           string             Filter by author
+  --involves         string             Filter based on involvement of user
+  --mentions         string             Filter based on user mentions
+  --commenter        string             Filter based on comments by user
+  --review-requested string             Filter based on comments by user
+  --reviewed-by      string             Filter on user who reviewed
+
+date range:
+  -d, --days-ago     since(..until)     Specify the period to filter n days ago
+      --since        yyyy-mm-dd         Start date to filter by date
+      --until        yyyy-mm-dd         End date to filter by date
+
+date filter:
+  --created                             Filter based on created at date
+  --closed                              Filter on closed at date
+  --merged                              Filter on merged at date
+  --updated                             Filter on last updated at date
+
+pull_request filter:
+  --draft                               Filter based on draft state
+  ```
