@@ -97,13 +97,13 @@ parse_params() {
     COMMENTER=
     REVIEW_REQUESTED=
     REVIEWED_BY=
-    PRS_DATE_FILTER=updated
-    ISSUES_DATE_FILTER=updated
+    PRS_DATE_FILTER="updated"
+    ISSUES_DATE_FILTER="updated"
     LIMIT=
     OWNER=
     REPO=
-    SORT=updated
-    SEARCH_SUBCOMMAND=issues
+    SORT="updated"
+    SEARCH_SUBCOMMAND="issues"
     FORMAT=
 
     while :; do
@@ -115,12 +115,12 @@ parse_params() {
             AUTHOR="${2-}"
             shift ;;
         --created )
-            PRS_DATE_FILTER=created
-            ISSUES_DATE_FILTER=created
+            PRS_DATE_FILTER="created"
+            ISSUES_DATE_FILTER="created"
             ;;
         --closed )
-            PRS_DATE_FILTER=closed
-            ISSUES_DATE_FILTER=closed
+            PRS_DATE_FILTER="closed"
+            ISSUES_DATE_FILTER="closed"
             ;;
         --commenter)
             COMMENTER="${2-}"
@@ -139,7 +139,7 @@ parse_params() {
             shift ;;
         --draft )
             GH_PRS_OPTIONS+=(--draft)
-            SEARCH_SUBCOMMAND=prs
+            SEARCH_SUBCOMMAND="prs"
             ;;
         --format| -f )
             case "${2-}" in
@@ -165,8 +165,8 @@ parse_params() {
             shift ;;
         --merged )
             GH_PRS_OPTIONS+=("--merged")
-            PRS_DATE_FILTER=merged-at
-            SEARCH_SUBCOMMAND=prs
+            PRS_DATE_FILTER="merged-at"
+            SEARCH_SUBCOMMAND="prs"
             ;;
         --owner )
             OWNER="${2-}"
@@ -176,11 +176,11 @@ parse_params() {
             shift ;;
         --review-requested)
             REVIEW_REQUESTED="${2-}"
-            SEARCH_SUBCOMMAND=prs
+            SEARCH_SUBCOMMAND="prs"
             shift ;;
         --reviewed-by)
             REVIEWED_BY="${2-}"
-            SEARCH_SUBCOMMAND=prs
+            SEARCH_SUBCOMMAND="prs"
             shift ;;
         --since )
             SINCE="${2-}"
@@ -192,8 +192,8 @@ parse_params() {
             UNTIL="${2-}"
             shift ;;
         --updated )
-            PRS_DATE_FILTER=updated
-            ISSUES_DATE_FILTER=updated
+            PRS_DATE_FILTER="updated"
+            ISSUES_DATE_FILTER="updated"
             ;;
         --web| -w )
             GH_OPTIONS+=(--web)
