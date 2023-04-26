@@ -55,6 +55,7 @@ usage() {
       --owner        string             Filter on repository owner
   -R, --repo         [HOST/]OWNER/REPO  Specify search target
       --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default \"updated\")
+      --state        string             Filter based on state: {open|closed}
   -w, --web                             Open the search query in the web browser
 
 account filter: default --auther @me, if not specified bellow
@@ -103,6 +104,7 @@ parse_params() {
     OWNER=
     REPO=
     SORT="updated"
+    STATE=
     SEARCH_SUBCOMMAND="issues"
     FORMAT=
 
@@ -188,6 +190,9 @@ parse_params() {
         --sort )
             SORT="${2-}"
             shift ;;
+        --state )
+            STATE="${2-}"
+            shift ;;
         --until )
             UNTIL="${2-}"
             shift ;;
@@ -228,6 +233,9 @@ if [ -n "${REPO}" ]; then
 fi
 if [ -n "${SORT}" ]; then
     GH_OPTIONS+=(--sort "${SORT}")
+fi
+if [ -n "${STATE}" ]; then
+    GH_OPTIONS+=(--state "${STATE}")
 fi
 
 # date filter
