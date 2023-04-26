@@ -28,6 +28,23 @@ gh activity-report -d 7
 gh activity-report --involves "@me" -d 7..3
 ```
 
+### Output in a format for pasting into GitHub
+
+```sh
+gh activity-report -d 7..5 --format comment
+```
+
+```text
+Showing 5 of 5 issues and pull requests
+
+TITLE                         KIND  STATE   UPDATE                LINK
+fix release-drafter workflow  pr    merged  2023-04-22T14:23:00Z  srz-zumix/gh-activity-report#4
+use issues --include-prs      pr    merged  2023-04-22T14:07:19Z  srz-zumix/gh-activity-report#3
+add -w,--web option           pr    merged  2023-04-22T14:02:16Z  srz-zumix/gh-activity-report#2
+first commit                  pr    merged  2023-04-22T10:40:14Z  srz-zumix/gh-activity-report#1
+update README                 pr    merged  2023-04-21T05:23:27Z  srz-zumix/gh-act#80
+```
+
 ## Options
 
 ```text
@@ -70,6 +87,6 @@ pull_request filter:
 | name     | description |
 |:---------|:------------|
 | comment  | plain text for GitHub issue|pr comment |
-| gh       | gh search (issues|prs) format |
+| gh       | gh search (issues\|prs) format |
 | link     | link only |
 | markdown | markdown |
