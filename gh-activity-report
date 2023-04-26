@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)
+SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)
 
 GH_AR_VERSION=0.1
 DATE_TYPE=
@@ -48,6 +48,7 @@ usage() {
     # shellcheck disable=SC1078
     die "gh-activity-report version ${GH_AR_VERSION}
 
+  -f, --format       string             Output format: [comment|gh|link|markdown] (default \"gh\")
   -h, --help                            Show help
       --version                         Show version
   -l, --limit        number             Maximum number of results to fetch
@@ -96,13 +97,14 @@ parse_params() {
     COMMENTER=
     REVIEW_REQUESTED=
     REVIEWED_BY=
-    PRS_DATE_FILTER=updated
-    ISSUES_DATE_FILTER=updated
+    PRS_DATE_FILTER="updated"
+    ISSUES_DATE_FILTER="updated"
     LIMIT=
     OWNER=
     REPO=
-    SORT=updated
-    SEARCH_ISSUES=true
+    SORT="updated"
+    SEARCH_SUBCOMMAND="issues"
+    FORMAT=
 
     while :; do
         case "${1-}" in
@@ -113,12 +115,12 @@ parse_params() {
             AUTHOR="${2-}"
             shift ;;
         --created )
-            PRS_DATE_FILTER=created
-            ISSUES_DATE_FILTER=created
+            PRS_DATE_FILTER="created"
+            ISSUES_DATE_FILTER="created"
             ;;
         --closed )
-            PRS_DATE_FILTER=closed
-            ISSUES_DATE_FILTER=closed
+            PRS_DATE_FILTER="closed"
+            ISSUES_DATE_FILTER="closed"
             ;;
         --commenter)
             COMMENTER="${2-}"
@@ -137,8 +139,21 @@ parse_params() {
             shift ;;
         --draft )
             GH_PRS_OPTIONS+=(--draft)
-            SEARCH_ISSUES=false
+            SEARCH_SUBCOMMAND="prs"
             ;;
+        --format| -f )
+            case "${2-}" in
+            gh ) ;;
+            * )
+                FORMAT="${2-}"
+                if [ ! -f "${SCRIPT_DIR}/format/${FORMAT}.template" ] \
+                && [ ! -f "${SCRIPT_DIR}/format/issues/${FORMAT}.template" ]; then
+                    echo "error: invalid format type"
+                    usage 1
+                fi
+                ;;
+            esac
+            shift ;;
         --involves)
             INVOLVES="${2-}"
             shift ;;
@@ -149,8 +164,9 @@ parse_params() {
             MENTIONS="${2-}"
             shift ;;
         --merged )
-            PRS_DATE_FILTER=merged-at
-            SEARCH_ISSUES=false
+            GH_PRS_OPTIONS+=("--merged")
+            PRS_DATE_FILTER="merged-at"
+            SEARCH_SUBCOMMAND="prs"
             ;;
         --owner )
             OWNER="${2-}"
@@ -160,11 +176,11 @@ parse_params() {
             shift ;;
         --review-requested)
             REVIEW_REQUESTED="${2-}"
-            SEARCH_ISSUES=false
+            SEARCH_SUBCOMMAND="prs"
             shift ;;
         --reviewed-by)
             REVIEWED_BY="${2-}"
-            SEARCH_ISSUES=false
+            SEARCH_SUBCOMMAND="prs"
             shift ;;
         --since )
             SINCE="${2-}"
@@ -176,8 +192,8 @@ parse_params() {
             UNTIL="${2-}"
             shift ;;
         --updated )
-            PRS_DATE_FILTER=updated
-            ISSUES_DATE_FILTER=updated
+            PRS_DATE_FILTER="updated"
+            ISSUES_DATE_FILTER="updated"
             ;;
         --web| -w )
             GH_OPTIONS+=(--web)
@@ -258,8 +274,27 @@ if [ -n "${REVIEWED_BY}" ]; then
     GH_OPTIONS+=(--reviewed-by "${REVIEWED_BY}")
 fi
 
-if ${SEARCH_ISSUES}; then
-    gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
-else
-    gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
+get_format_template() {
+    FORMAT_TEMPLATE=$(cat "${1}/${FORMAT}.template")
+    JSON_KEYS=$(cat "${1}/${FORMAT}.keys")
+    GH_OPTIONS+=(--json "${JSON_KEYS}")
+    GH_OPTIONS+=(--template "${FORMAT_TEMPLATE}")
+}
+    
+if [ -n "${FORMAT}" ]; then
+    if [ -f "${SCRIPT_DIR}/format/${FORMAT}.template" ]; then
+        get_format_template "${SCRIPT_DIR}/format"
+    else
+        get_format_template "${SCRIPT_DIR}/format/${SEARCH_SUBCOMMAND}"
+    fi    
 fi
+
+search() {
+    if [ "${SEARCH_SUBCOMMAND}" = "prs" ]; then
+        gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
+    else
+        gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
+    fi
+}
+
+search

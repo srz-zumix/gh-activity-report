@@ -31,12 +31,14 @@ gh activity-report --involves "@me" -d 7..3
 ## Options
 
 ```text
+  -f, --format       string             Output format: [comment|gh|link|markdown] (default "gh")
   -h, --help                            Show help
       --version                         Show version
   -l, --limit        number             Maximum number of results to fetch
       --owner        string             Filter on repository owner
   -R, --repo         [HOST/]OWNER/REPO  Specify search target
       --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default "updated")
+  -w, --web                             Open the search query in the web browser
 
 account filter: default --auther @me, if not specified bellow
   --assignee         string             Filter by assignee
@@ -60,4 +62,13 @@ date filter:
 
 pull_request filter:
   --draft                               Filter based on draft state
-  ```
+```
+
+## Output format
+
+| name     | description |
+|:---------|:------------|
+| comment  | plain text for GitHub issue|pr comment |
+| gh       | gh search (issues|prs) format |
+| link     | link only |
+| markdown | markdown |
