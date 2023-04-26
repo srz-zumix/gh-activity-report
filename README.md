@@ -38,6 +38,7 @@ gh activity-report --involves "@me" -d 7..3
       --owner        string             Filter on repository owner
   -R, --repo         [HOST/]OWNER/REPO  Specify search target
       --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default "updated")
+      --state        string             Filter based on state: {open|closed}
   -w, --web                             Open the search query in the web browser
 
 account filter: default --auther @me, if not specified bellow
