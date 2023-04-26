@@ -1,0 +1,7 @@
+Showing {{ len . }} of {{ len . }} issues and pull requests
+
+{{  tablerow "TITLE" "KIND" "STATE" "UPDATE" "LINK" -}}
+{{- range $index, $element := . -}}
+{{- $kind := "issue" -}}{{- if $element.isPullRequest -}}{{- $kind = "pr" -}}{{- end -}}
+{{- tablerow $element.title $kind $element.state $element.updatedAt (printf "%s#%.f" $element.repository.nameWithOwner $element.number) -}}
+{{- end -}}{{ tablerender }}
