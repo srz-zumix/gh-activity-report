@@ -216,7 +216,7 @@ parse_params() {
         --* )
             echo "${1:-} is invalid option."
             usage 1
-            break ;;
+            ;;
         *) break ;;
         esac
         shift
