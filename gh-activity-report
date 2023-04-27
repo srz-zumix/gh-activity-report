@@ -209,9 +209,13 @@ parse_params() {
         --help| -h )
             usage 0
             ;;
-        --)
+        -- )
             shift
             BYPASS_OPTIONS=("$@")
+            break ;;
+        --* )
+            echo "${1:-} is invalid option."
+            usage 1
             break ;;
         *) break ;;
         esac
