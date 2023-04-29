@@ -58,7 +58,9 @@ usage() {
       --state        string             Filter based on state: {open|closed}
   -w, --web                             Open the search query in the web browser
 
-account filter: default --auther @me, if not specified bellow
+account filter: Default --auther @me, if not specified bellow
+                Account filters can be specified multiple times.
+                In that case, it becomes an OR condition
   --assignee         string             Filter by assignee
   --author           string             Filter by author
   --involves         string             Filter based on involvement of user
@@ -86,6 +88,15 @@ pull_request filter:
 declare -a GH_OPTIONS
 declare -a GH_PRS_OPTIONS
 declare -a GH_ISSUES_OPTIONS
+declare -a GH_BYPASS_OPTIONS
+
+append_csv_param() {
+    if [ -n "${1}" ]; then
+        echo "${1},${2}"
+    else
+        echo "${2}"
+    fi
+}
 
 parse_params() {
     # default values of variables set from params
@@ -107,14 +118,15 @@ parse_params() {
     STATE=
     SEARCH_SUBCOMMAND="issues"
     FORMAT=
+    INPUT_BYPASS_OPTIONS=()
 
     while :; do
         case "${1-}" in
-        --assignee)
-            ASSIGNEE="${2-}"
+        --assignee )
+            ASSIGNEE=$(append_csv_param "${ASSIGNEE}" "${2-}")
             shift ;;
-        --author)
-            AUTHOR="${2-}"
+        --author )
+            AUTHOR=$(append_csv_param "${AUTHOR}" "${2-}")
             shift ;;
         --created )
             PRS_DATE_FILTER="created"
@@ -124,8 +136,8 @@ parse_params() {
             PRS_DATE_FILTER="closed"
             ISSUES_DATE_FILTER="closed"
             ;;
-        --commenter)
-            COMMENTER="${2-}"
+        --commenter )
+            COMMENTER=$(append_csv_param "${COMMENTER}" "${2-}")
             shift ;;
         --days-ago| -d )
             DAYS_AGO="${2-}"
@@ -156,14 +168,14 @@ parse_params() {
                 ;;
             esac
             shift ;;
-        --involves)
-            INVOLVES="${2-}"
+        --involves )
+            INVOLVES=$(append_csv_param "${INVOLVES}" "${2-}")
             shift ;;
         --limit| -l )
             LIMIT="${2-}"
             shift ;;
-        --mentions)
-            MENTIONS="${2-}"
+        --mentions )
+            MENTIONS=$(append_csv_param "${MENTIONS}" "${2-}")
             shift ;;
         --merged )
             GH_PRS_OPTIONS+=("--merged")
@@ -176,12 +188,12 @@ parse_params() {
         --repo| -R )
             REPO="${2-}"
             shift ;;
-        --review-requested)
-            REVIEW_REQUESTED="${2-}"
+        --review-requested )
+            REVIEW_REQUESTED=$(append_csv_param "${REVIEW_REQUESTED}" "${2-}")
             SEARCH_SUBCOMMAND="prs"
             shift ;;
-        --reviewed-by)
-            REVIEWED_BY="${2-}"
+        --reviewed-by )
+            REVIEWED_BY=$(append_csv_param "${REVIEWED_BY}" "${2-}")
             SEARCH_SUBCOMMAND="prs"
             shift ;;
         --since )
@@ -211,7 +223,7 @@ parse_params() {
             ;;
         -- )
             shift
-            BYPASS_OPTIONS=("$@")
+            INPUT_BYPASS_OPTIONS=("$@")
             break ;;
         --* )
             echo "${1:-} is invalid option."
@@ -264,26 +276,38 @@ fi
 if [ -z "${AUTHOR}${ASSIGNEE}${INVOLVES}${MENTIONS}${COMMENTER}${REVIEW_REQUESTED}${REVIEWED_BY}" ]; then
     AUTHOR="@me"
 fi
+
+multi_option() {
+    IFS=, VARS=(${2})
+    for index in "${!VARS[@]}"; do
+        if [ "${index}" == 0 ]; then
+            GH_OPTIONS+=("${1}" "${VARS[${index}]}")
+        else
+            GH_BYPASS_OPTIONS+=("${3:-"${1#--}"}":"${VARS[${index}]}")
+        fi
+    done
+}
+
 if [ -n "${AUTHOR}" ]; then
-    GH_OPTIONS+=(--author "${AUTHOR}")
+    multi_option --author "${AUTHOR}"
 fi
 if [ -n "${ASSIGNEE}" ]; then
-    GH_OPTIONS+=(--assignee "${ASSIGNEE}")
+    multi_option --assignee "${ASSIGNEE}"
 fi
 if [ -n "${INVOLVES}" ]; then
-    GH_OPTIONS+=(--involves "${INVOLVES}")
+    multi_option --involves "${INVOLVES}"
 fi
 if [ -n "${MENTIONS}" ]; then
-    GH_OPTIONS+=(--mentions "${MENTIONS}")
+    multi_option --mentions "${MENTIONS}"
 fi
 if [ -n "${COMMENTER}" ]; then
-    GH_OPTIONS+=(--commenter "${COMMENTER}")
+    multi_option --commenter "${COMMENTER}"
 fi
 if [ -n "${REVIEW_REQUESTED}" ]; then
-    GH_OPTIONS+=(--review-requested "${REVIEW_REQUESTED}")
+    multi_option --review-requested "${REVIEW_REQUESTED}"
 fi
 if [ -n "${REVIEWED_BY}" ]; then
-    GH_OPTIONS+=(--reviewed-by "${REVIEWED_BY}")
+    multi_option --reviewed-by "${REVIEWED_BY}"
 fi
 
 get_format_template() {
@@ -301,11 +325,22 @@ if [ -n "${FORMAT}" ]; then
     fi    
 fi
 
+is_contains() {
+    for e in "${2}"; do
+        [[ "$e" == "${1}" ]] && return 0
+    done
+    return 1
+}
+
+if [ "${#GH_BYPASS_OPTIONS[@]}" != 0 ]; then
+    is_contains "--" "${INPUT_BYPASS_OPTIONS[@]}" "" || INPUT_BYPASS_OPTIONS+=(--)
+fi
+
 search() {
     if [ "${SEARCH_SUBCOMMAND}" = "prs" ]; then
-        gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
+        gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}" "${GH_BYPASS_OPTIONS[@]}"
     else
-        gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
+        gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}"  "${GH_BYPASS_OPTIONS[@]}"
     fi
 }
 

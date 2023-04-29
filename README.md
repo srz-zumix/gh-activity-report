@@ -58,7 +58,9 @@ update README                 pr    merged  2023-04-21T05:23:27Z  srz-zumix/gh-a
       --state        string             Filter based on state: {open|closed}
   -w, --web                             Open the search query in the web browser
 
-account filter: default --auther @me, if not specified bellow
+account filter: Default --auther @me, if not specified bellow
+                Account filters can be specified multiple times.
+                In that case, it becomes an OR condition
   --assignee         string             Filter by assignee
   --author           string             Filter by author
   --involves         string             Filter based on involvement of user
