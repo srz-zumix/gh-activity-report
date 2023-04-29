@@ -278,7 +278,7 @@ if [ -z "${AUTHOR}${ASSIGNEE}${INVOLVES}${MENTIONS}${COMMENTER}${REVIEW_REQUESTE
 fi
 
 multi_option() {
-    IFS=, VARS=(${2})
+    IFS="," read -r -a VARS <<< "${2}"
     for index in "${!VARS[@]}"; do
         if [ "${index}" == 0 ]; then
             GH_OPTIONS+=("${1}" "${VARS[${index}]}")
@@ -326,8 +326,11 @@ if [ -n "${FORMAT}" ]; then
 fi
 
 is_contains() {
-    for e in "${2}"; do
-        [[ "$e" == "${1}" ]] && return 0
+    match="${1}"
+    shift
+    while [ -n "${1}" ]; do
+        [[ "${match}" == "${1}" ]] && return 0
+        shift
     done
     return 1
 }
