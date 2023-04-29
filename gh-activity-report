@@ -88,7 +88,7 @@ pull_request filter:
 declare -a GH_OPTIONS
 declare -a GH_PRS_OPTIONS
 declare -a GH_ISSUES_OPTIONS
-declare -a GH_BYPASS_OPTIONS
+GH_BYPASS_OPTIONS=()
 
 append_csv_param() {
     if [ -n "${1}" ]; then
