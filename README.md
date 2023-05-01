@@ -53,6 +53,7 @@ update README                 pr    merged  2023-04-21T05:23:27Z  srz-zumix/gh-a
       --version                         Show version
   -l, --limit        number             Maximum number of results to fetch
       --owner        string             Filter on repository owner
+      --prs                             Search for pull requests
   -R, --repo         [HOST/]OWNER/REPO  Specify search target
       --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default "updated")
       --state        string             Filter based on state: {open|closed}
