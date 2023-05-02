@@ -48,7 +48,7 @@ usage() {
     # shellcheck disable=SC1078
     die "gh-activity-report version ${GH_AR_VERSION}
 
-  -f, --format       string             Output format: [comment|gh|link|markdown] (default \"gh\")
+  -f, --format       string             Output format: [comment|gh|link|list|markdown] (default \"gh\")
   -h, --help                            Show help
       --version                         Show version
   -l, --limit        number             Maximum number of results to fetch
