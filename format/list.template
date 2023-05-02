@@ -1,0 +1,3 @@
+{{ range $index, $element := . -}}
+* [\[{{ $element.repository.nameWithOwner }}\]: {{ $element.title }}]({{ $element.url }})
+{{ end }}

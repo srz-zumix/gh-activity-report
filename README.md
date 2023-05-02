@@ -48,7 +48,7 @@ update README                 pr    merged  2023-04-21T05:23:27Z  srz-zumix/gh-a
 ## Options
 
 ```text
-  -f, --format       string             Output format: [comment|gh|link|markdown] (default "gh")
+  -f, --format       string             Output format: [comment|gh|link|list|markdown] (default "gh")
   -h, --help                            Show help
       --version                         Show version
   -l, --limit        number             Maximum number of results to fetch
@@ -90,4 +90,5 @@ pull_request filter:
 | comment  | plain text for GitHub issue|pr comment |
 | gh       | gh search (issues\|prs) format |
 | link     | link only |
-| markdown | markdown |
+| list     | markdown list |
+| markdown | markdown table |
