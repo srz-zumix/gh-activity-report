@@ -39,14 +39,12 @@ version-resolver:
       - 'feature'
       - 'enhancement'
       - 'dependency'
-  patch:
-    labels:
       - 'fix'
       - 'bug'
       - 'security'
-  default: patch
+  default: minor
 template: |
-  [Compare $PREVIOUS_TAG with v$RESOLVED_VERSION](https://github.com/srz-zumix/gh-act/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION)
+  [Compare $PREVIOUS_TAG with v$RESOLVED_VERSION](https://github.com/srz-zumix/gh-activity-report/compare/$PREVIOUS_TAG...v$RESOLVED_VERSION)
 
   ## Changes
 
