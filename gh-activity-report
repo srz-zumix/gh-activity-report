@@ -90,6 +90,10 @@ declare -a GH_OPTIONS
 declare -a GH_PRS_OPTIONS
 declare -a GH_ISSUES_OPTIONS
 
+test_empty_or_option_param() {
+    [ -n "${1}" ] && [ "${1:0:2}" != "--" ]
+}
+
 test_empty_param() {
     [ -n "${1}" ] || usage 1
 }
@@ -119,11 +123,11 @@ parse_params() {
         case "${1-}" in
         --assignee)
             ASSIGNEE="${2-}"
-            [ -z "${ASSIGNEE-}" ] && ASSIGNEE=\"@me\" || shift
+            (test_empty_or_option_param "${ASSIGNEE-}" && shift) || ASSIGNEE="@me"
             ;;
         --author)
             AUTHOR="${2-}"
-            [ -z "${AUTHOR-}" ] && AUTHOR=\"@me\" || shift
+            (test_empty_or_option_param "${AUTHOR-}" && shift) || AUTHOR="@me"
             ;;
         --created )
             PRS_DATE_FILTER="created"
@@ -135,7 +139,7 @@ parse_params() {
             ;;
         --commenter)
             COMMENTER="${2-}"
-            [ -z "${COMMENTER-}" ] && COMMENTER=\"@me\" || shift
+            (test_empty_or_option_param "${COMMENTER-}" && shift) || COMMENTER="@me"
             ;;
         --days-ago| -d )
             test_empty_param "${2-}"
@@ -170,14 +174,14 @@ parse_params() {
             shift ;;
         --involves)
             INVOLVES="${2-}"
-            [ -z "${INVOLVES-}" ] && INVOLVES=\"@me\" || shift
+            (test_empty_or_option_param "${INVOLVES-}" && shift) || INVOLVES="@me"
             ;;
         --limit| -l )
             LIMIT="${2-}"
             shift ;;
         --mentions)
             MENTIONS="${2-}"
-            [ -z "${MENTIONS-}" ] && MENTIONS=\"@me\" || shift
+            (test_empty_or_option_param "${MENTIONS-}" && shift) || MENTIONS="@me"
             ;;
         --merged )
             GH_PRS_OPTIONS+=("--merged")
@@ -197,12 +201,12 @@ parse_params() {
             shift ;;
         --review-requested)
             REVIEW_REQUESTED="${2-}"
-            [ -z "${REVIEW_REQUESTED-}" ] && REVIEW_REQUESTED=\"@me\" || shift
+            (test_empty_or_option_param "${REVIEW_REQUESTED-}" && shift) || REVIEW_REQUESTED="@me"
             SEARCH_SUBCOMMAND="prs"
             ;;
         --reviewed-by)
             REVIEWED_BY="${2-}"
-            [ -z "${REVIEWED_BY-}" ] && REVIEWED_BY=\"@me\" || shift
+            (test_empty_or_option_param "${REVIEWED_BY-}" && shift) || REVIEWED_BY="@me"
             SEARCH_SUBCOMMAND="prs"
             ;;
         --since )
@@ -287,7 +291,7 @@ fi
 
 # account filter
 if [ -z "${AUTHOR}${ASSIGNEE}${INVOLVES}${MENTIONS}${COMMENTER}${REVIEW_REQUESTED}${REVIEWED_BY}" ]; then
-    AUTHOR=\"@me\"
+    AUTHOR="@me"
 fi
 if [ -n "${AUTHOR}" ]; then
     GH_OPTIONS+=(--author "${AUTHOR}")
