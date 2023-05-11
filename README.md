@@ -60,16 +60,18 @@ update README                 pr    merged  2023-04-21T05:23:27Z  srz-zumix/gh-a
   -w, --web                             Open the search query in the web browser
 
 account filter: default --auther @me, if not specified bellow
-  --assignee         string             Filter by assignee
-  --author           string             Filter by author
-  --involves         string             Filter based on involvement of user
-  --mentions         string             Filter based on user mentions
-  --commenter        string             Filter based on comments by user
-  --review-requested string             Filter based on comments by user
-  --reviewed-by      string             Filter on user who reviewed
+  --assignee         [name]             Filter by assignee
+  --author           [name]             Filter by author
+  --commenter        [name]             Filter based on comments by user
+  --involves         [name]             Filter based on involvement of user
+  --mentions         [name]             Filter based on user mentions
+  --review-requested [name]             Filter based on comments by user
+  --reviewed-by      [name]             Filter on user who reviewed
+
+   (defaults to \"@me\" if not specified [name])
 
 date range:
-  -d, --days-ago     since(..until)     Specify the period to filter n days ago
+  -d, --days-ago     since[..until]     Specify the period to filter n days ago
       --since        yyyy-mm-dd         Start date to filter by date
       --until        yyyy-mm-dd         End date to filter by date
 
