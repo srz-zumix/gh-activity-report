@@ -90,6 +90,17 @@ declare -a GH_PRS_OPTIONS
 declare -a GH_ISSUES_OPTIONS
 GH_BYPASS_OPTIONS=()
 
+resolve_username() {
+    if "${GITHUB_ACTIONS:-false}"; then
+        case "${1-}" in
+        "@me" )
+            echo "${GITHUB_ACTOR:-@me}"
+            return ;;
+        esac
+    fi
+    echo "${1}"
+}
+
 append_csv_param() {
     if [ -n "${1}" ]; then
         echo "${1},${2}"
@@ -280,10 +291,11 @@ fi
 multi_option() {
     IFS="," read -r -a VARS <<< "${2}"
     for index in "${!VARS[@]}"; do
+        var=$(resolve_username "${VARS[${index}]}")
         if [ "${index}" == 0 ]; then
-            GH_OPTIONS+=("${1}" "${VARS[${index}]}")
+            GH_OPTIONS+=("${1}" "${var}")
         else
-            GH_BYPASS_OPTIONS+=("${3:-"${1#--}"}":"${VARS[${index}]}")
+            GH_BYPASS_OPTIONS+=("${3:-"${1#--}"}":"${var}")
         fi
     done
 }
