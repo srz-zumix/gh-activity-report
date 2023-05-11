@@ -48,11 +48,12 @@ update README                 pr    merged  2023-04-21T05:23:27Z  srz-zumix/gh-a
 ## Options
 
 ```text
-  -f, --format       string             Output format: [comment|gh|link|markdown] (default "gh")
+  -f, --format       string             Output format: [comment|gh|link|list|markdown] (default "gh")
   -h, --help                            Show help
       --version                         Show version
   -l, --limit        number             Maximum number of results to fetch
       --owner        string             Filter on repository owner
+      --prs                             Search for pull requests
   -R, --repo         [HOST/]OWNER/REPO  Specify search target
       --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default "updated")
       --state        string             Filter based on state: {open|closed}
@@ -61,16 +62,18 @@ update README                 pr    merged  2023-04-21T05:23:27Z  srz-zumix/gh-a
 account filter: Default --auther @me, if not specified bellow
                 Account filters can be specified multiple times.
                 In that case, it becomes an OR condition
-  --assignee         string             Filter by assignee
-  --author           string             Filter by author
-  --involves         string             Filter based on involvement of user
-  --mentions         string             Filter based on user mentions
-  --commenter        string             Filter based on comments by user
-  --review-requested string             Filter based on comments by user
-  --reviewed-by      string             Filter on user who reviewed
+  --assignee         [name]             Filter by assignee
+  --author           [name]             Filter by author
+  --commenter        [name]             Filter based on comments by user
+  --involves         [name]             Filter based on involvement of user
+  --mentions         [name]             Filter based on user mentions
+  --review-requested [name]             Filter based on comments by user
+  --reviewed-by      [name]             Filter on user who reviewed
+
+   (defaults to \"@me\" if not specified [name])
 
 date range:
-  -d, --days-ago     since(..until)     Specify the period to filter n days ago
+  -d, --days-ago     since[..until]     Specify the period to filter n days ago
       --since        yyyy-mm-dd         Start date to filter by date
       --until        yyyy-mm-dd         End date to filter by date
 
@@ -91,4 +94,5 @@ pull_request filter:
 | comment  | plain text for GitHub issue|pr comment |
 | gh       | gh search (issues\|prs) format |
 | link     | link only |
-| markdown | markdown |
+| list     | markdown list |
+| markdown | markdown table |

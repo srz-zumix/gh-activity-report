@@ -48,11 +48,12 @@ usage() {
     # shellcheck disable=SC1078
     die "gh-activity-report version ${GH_AR_VERSION}
 
-  -f, --format       string             Output format: [comment|gh|link|markdown] (default \"gh\")
+  -f, --format       string             Output format: [comment|gh|link|list|markdown] (default \"gh\")
   -h, --help                            Show help
       --version                         Show version
   -l, --limit        number             Maximum number of results to fetch
       --owner        string             Filter on repository owner
+      --prs                             Search for pull requests
   -R, --repo         [HOST/]OWNER/REPO  Specify search target
       --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default \"updated\")
       --state        string             Filter based on state: {open|closed}
@@ -61,16 +62,18 @@ usage() {
 account filter: Default --auther @me, if not specified bellow
                 Account filters can be specified multiple times.
                 In that case, it becomes an OR condition
-  --assignee         string             Filter by assignee
-  --author           string             Filter by author
-  --involves         string             Filter based on involvement of user
-  --mentions         string             Filter based on user mentions
-  --commenter        string             Filter based on comments by user
-  --review-requested string             Filter based on comments by user
-  --reviewed-by      string             Filter on user who reviewed
+  --assignee         [name]             Filter by assignee
+  --author           [name]             Filter by author
+  --commenter        [name]             Filter based on comments by user
+  --involves         [name]             Filter based on involvement of user
+  --mentions         [name]             Filter based on user mentions
+  --review-requested [name]             Filter based on comments by user
+  --reviewed-by      [name]             Filter on user who reviewed
+
+   (defaults to \"@me\" if not specified [name])
 
 date range:
-  -d, --days-ago     since(..until)     Specify the period to filter n days ago
+  -d, --days-ago     since[..until]     Specify the period to filter n days ago
       --since        yyyy-mm-dd         Start date to filter by date
       --until        yyyy-mm-dd         End date to filter by date
 
@@ -109,6 +112,14 @@ append_csv_param() {
     fi
 }
 
+test_empty_or_option_param() {
+    [ -n "${1}" ] && [ "${1:0:2}" != "--" ]
+}
+
+test_empty_param() {
+    [ -n "${1}" ] || usage 1
+}
+
 parse_params() {
     # default values of variables set from params
     SINCE=
@@ -134,11 +145,15 @@ parse_params() {
     while :; do
         case "${1-}" in
         --assignee )
-            ASSIGNEE=$(append_csv_param "${ASSIGNEE}" "${2-}")
-            shift ;;
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            ASSIGNEE=$(append_csv_param "${ASSIGNEE}" "${NAME_-}")
+            ;;
         --author )
-            AUTHOR=$(append_csv_param "${AUTHOR}" "${2-}")
-            shift ;;
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            AUTHOR=$(append_csv_param "${AUTHOR}" "${NAME_-}")
+            ;;
         --created )
             PRS_DATE_FILTER="created"
             ISSUES_DATE_FILTER="created"
@@ -148,9 +163,12 @@ parse_params() {
             ISSUES_DATE_FILTER="closed"
             ;;
         --commenter )
-            COMMENTER=$(append_csv_param "${COMMENTER}" "${2-}")
-            shift ;;
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            COMMENTER=$(append_csv_param "${COMMENTER}" "${NAME_-}")
+            ;;
         --days-ago| -d )
+            test_empty_param "${2-}"
             DAYS_AGO="${2-}"
             DAYS_AGO_SINCE="${DAYS_AGO%%..*}"
             DAYS_AGO_UNTIL_="${DAYS_AGO#"${DAYS_AGO_SINCE}"}"
@@ -167,6 +185,7 @@ parse_params() {
             SEARCH_SUBCOMMAND="prs"
             ;;
         --format| -f )
+            test_empty_param "${2-}"
             case "${2-}" in
             gh ) ;;
             * )
@@ -180,43 +199,60 @@ parse_params() {
             esac
             shift ;;
         --involves )
-            INVOLVES=$(append_csv_param "${INVOLVES}" "${2-}")
-            shift ;;
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            INVOLVES=$(append_csv_param "${INVOLVES}" "${NAME_-}")
+            ;;
         --limit| -l )
             LIMIT="${2-}"
             shift ;;
         --mentions )
-            MENTIONS=$(append_csv_param "${MENTIONS}" "${2-}")
-            shift ;;
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            MENTIONS=$(append_csv_param "${MENTIONS}" "${NAME_-}")
+            ;;
         --merged )
             GH_PRS_OPTIONS+=("--merged")
             PRS_DATE_FILTER="merged-at"
             SEARCH_SUBCOMMAND="prs"
             ;;
         --owner )
+            test_empty_param "${2-}"
             OWNER="${2-}"
             shift ;;
+        --prs )
+            SEARCH_SUBCOMMAND="prs"
+            ;;
         --repo| -R )
+            test_empty_param "${2-}"
             REPO="${2-}"
             shift ;;
         --review-requested )
-            REVIEW_REQUESTED=$(append_csv_param "${REVIEW_REQUESTED}" "${2-}")
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            REVIEW_REQUESTED=$(append_csv_param "${REVIEW_REQUESTED}" "${NAME_-}")
             SEARCH_SUBCOMMAND="prs"
-            shift ;;
+            ;;
         --reviewed-by )
-            REVIEWED_BY=$(append_csv_param "${REVIEWED_BY}" "${2-}")
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            REVIEWED_BY=$(append_csv_param "${REVIEWED_BY}" "${NAME_-}")
             SEARCH_SUBCOMMAND="prs"
-            shift ;;
+            ;;
         --since )
+            test_empty_param "${2-}"
             SINCE="${2-}"
             shift ;;
         --sort )
+            test_empty_param "${2-}"
             SORT="${2-}"
             shift ;;
         --state )
+            test_empty_param "${2-}"
             STATE="${2-}"
             shift ;;
         --until )
+            test_empty_param "${2-}"
             UNTIL="${2-}"
             shift ;;
         --updated )
