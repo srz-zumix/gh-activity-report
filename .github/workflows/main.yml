@@ -4,11 +4,19 @@ on:
 
 env:
   GH_TOKEN: ${{ github.token }}
-    
+
+permissions: read-all
+
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - run: make install
-      - run: gh activity-report --author srz-zumix -d 7..3
+      - run: gh activity-report -d 7..3 -f comment | tee a.txt
+      - run: gh activity-report --author srz-zumix -d 7..3 -f comment | tee b.txt
+      - run: gh activity-report --author @me --author srz-zumix -d 7..3 -f comment | tee c.txt
+      - name: Test Diff
+        run: |
+            # diff a.txt b.txt
+            diff b.txt c.txt

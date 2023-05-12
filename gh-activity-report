@@ -59,7 +59,9 @@ usage() {
       --state        string             Filter based on state: {open|closed}
   -w, --web                             Open the search query in the web browser
 
-account filter: default --auther @me, if not specified bellow
+account filter: Default --auther @me, if not specified bellow
+                Account filters can be specified multiple times.
+                In that case, it becomes an OR condition
   --assignee         [name]             Filter by assignee
   --author           [name]             Filter by author
   --commenter        [name]             Filter based on comments by user
@@ -89,6 +91,26 @@ pull_request filter:
 declare -a GH_OPTIONS
 declare -a GH_PRS_OPTIONS
 declare -a GH_ISSUES_OPTIONS
+GH_BYPASS_OPTIONS=()
+
+resolve_username() {
+    if "${GITHUB_ACTIONS:-false}"; then
+        case "${1-}" in
+        "@me" )
+            echo "${GITHUB_ACTOR:-@me}"
+            return ;;
+        esac
+    fi
+    echo "${1}"
+}
+
+append_csv_param() {
+    if [ -n "${1}" ]; then
+        echo "${1},${2}"
+    else
+        echo "${2}"
+    fi
+}
 
 test_empty_or_option_param() {
     [ -n "${1}" ] && [ "${1:0:2}" != "--" ]
@@ -118,16 +140,19 @@ parse_params() {
     STATE=
     SEARCH_SUBCOMMAND="issues"
     FORMAT=
+    INPUT_BYPASS_OPTIONS=()
 
     while :; do
         case "${1-}" in
-        --assignee)
-            ASSIGNEE="${2-}"
-            (test_empty_or_option_param "${ASSIGNEE-}" && shift) || ASSIGNEE="@me"
+        --assignee )
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            ASSIGNEE=$(append_csv_param "${ASSIGNEE}" "${NAME_-}")
             ;;
-        --author)
-            AUTHOR="${2-}"
-            (test_empty_or_option_param "${AUTHOR-}" && shift) || AUTHOR="@me"
+        --author )
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            AUTHOR=$(append_csv_param "${AUTHOR}" "${NAME_-}")
             ;;
         --created )
             PRS_DATE_FILTER="created"
@@ -137,9 +162,10 @@ parse_params() {
             PRS_DATE_FILTER="closed"
             ISSUES_DATE_FILTER="closed"
             ;;
-        --commenter)
-            COMMENTER="${2-}"
-            (test_empty_or_option_param "${COMMENTER-}" && shift) || COMMENTER="@me"
+        --commenter )
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            COMMENTER=$(append_csv_param "${COMMENTER}" "${NAME_-}")
             ;;
         --days-ago| -d )
             test_empty_param "${2-}"
@@ -172,16 +198,18 @@ parse_params() {
                 ;;
             esac
             shift ;;
-        --involves)
-            INVOLVES="${2-}"
-            (test_empty_or_option_param "${INVOLVES-}" && shift) || INVOLVES="@me"
+        --involves )
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            INVOLVES=$(append_csv_param "${INVOLVES}" "${NAME_-}")
             ;;
         --limit| -l )
             LIMIT="${2-}"
             shift ;;
-        --mentions)
-            MENTIONS="${2-}"
-            (test_empty_or_option_param "${MENTIONS-}" && shift) || MENTIONS="@me"
+        --mentions )
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            MENTIONS=$(append_csv_param "${MENTIONS}" "${NAME_-}")
             ;;
         --merged )
             GH_PRS_OPTIONS+=("--merged")
@@ -199,14 +227,16 @@ parse_params() {
             test_empty_param "${2-}"
             REPO="${2-}"
             shift ;;
-        --review-requested)
-            REVIEW_REQUESTED="${2-}"
-            (test_empty_or_option_param "${REVIEW_REQUESTED-}" && shift) || REVIEW_REQUESTED="@me"
+        --review-requested )
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            REVIEW_REQUESTED=$(append_csv_param "${REVIEW_REQUESTED}" "${NAME_-}")
             SEARCH_SUBCOMMAND="prs"
             ;;
-        --reviewed-by)
-            REVIEWED_BY="${2-}"
-            (test_empty_or_option_param "${REVIEWED_BY-}" && shift) || REVIEWED_BY="@me"
+        --reviewed-by )
+            NAME_="${2-}"
+            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            REVIEWED_BY=$(append_csv_param "${REVIEWED_BY}" "${NAME_-}")
             SEARCH_SUBCOMMAND="prs"
             ;;
         --since )
@@ -240,7 +270,7 @@ parse_params() {
             ;;
         -- )
             shift
-            BYPASS_OPTIONS=("$@")
+            INPUT_BYPASS_OPTIONS=("$@")
             break ;;
         --* )
             echo "${1:-} is invalid option."
@@ -293,26 +323,39 @@ fi
 if [ -z "${AUTHOR}${ASSIGNEE}${INVOLVES}${MENTIONS}${COMMENTER}${REVIEW_REQUESTED}${REVIEWED_BY}" ]; then
     AUTHOR="@me"
 fi
+
+multi_option() {
+    IFS="," read -r -a VARS <<< "${2}"
+    for index in "${!VARS[@]}"; do
+        var=$(resolve_username "${VARS[${index}]}")
+        if [ "${index}" == 0 ]; then
+            GH_OPTIONS+=("${1}" "${var}")
+        else
+            GH_BYPASS_OPTIONS+=("${3:-"${1#--}"}":"${var}")
+        fi
+    done
+}
+
 if [ -n "${AUTHOR}" ]; then
-    GH_OPTIONS+=(--author "${AUTHOR}")
+    multi_option --author "${AUTHOR}"
 fi
 if [ -n "${ASSIGNEE}" ]; then
-    GH_OPTIONS+=(--assignee "${ASSIGNEE}")
+    multi_option --assignee "${ASSIGNEE}"
 fi
 if [ -n "${INVOLVES}" ]; then
-    GH_OPTIONS+=(--involves "${INVOLVES}")
+    multi_option --involves "${INVOLVES}"
 fi
 if [ -n "${MENTIONS}" ]; then
-    GH_OPTIONS+=(--mentions "${MENTIONS}")
+    multi_option --mentions "${MENTIONS}"
 fi
 if [ -n "${COMMENTER}" ]; then
-    GH_OPTIONS+=(--commenter "${COMMENTER}")
+    multi_option --commenter "${COMMENTER}"
 fi
 if [ -n "${REVIEW_REQUESTED}" ]; then
-    GH_OPTIONS+=(--review-requested "${REVIEW_REQUESTED}")
+    multi_option --review-requested "${REVIEW_REQUESTED}"
 fi
 if [ -n "${REVIEWED_BY}" ]; then
-    GH_OPTIONS+=(--reviewed-by "${REVIEWED_BY}")
+    multi_option --reviewed-by "${REVIEWED_BY}"
 fi
 
 get_format_template() {
@@ -330,11 +373,25 @@ if [ -n "${FORMAT}" ]; then
     fi    
 fi
 
+is_contains() {
+    match="${1}"
+    shift
+    while [ -n "${1}" ]; do
+        [[ "${match}" == "${1}" ]] && return 0
+        shift
+    done
+    return 1
+}
+
+if [ "${#GH_BYPASS_OPTIONS[@]}" != 0 ]; then
+    is_contains "--" "${INPUT_BYPASS_OPTIONS[@]}" "" || INPUT_BYPASS_OPTIONS+=(--)
+fi
+
 search() {
     if [ "${SEARCH_SUBCOMMAND}" = "prs" ]; then
-        gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
+        gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}" "${GH_BYPASS_OPTIONS[@]}"
     else
-        gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${BYPASS_OPTIONS[@]}"
+        gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}"  "${GH_BYPASS_OPTIONS[@]}"
     fi
 }
 
