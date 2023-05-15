@@ -33,6 +33,23 @@ date_day() {
     fi
 }
 
+date_month_first() {
+    if is_gnu_date; then
+        date -d "${1} month" "+%Y-%m-01"
+    else
+        date -v "${1}m" "+%Y-%m-01"
+    fi
+}
+
+date_month_last() {
+    FIRST=$(date_month_first "${1}")
+    if is_gnu_date; then
+        date -d "1 days ago + 1 month ${FIRST}" "+%Y-%m-%d"
+    else
+        date -v "+1m" -v "-1d" -j -f "%Y-%m-%d" "${FIRST}" "+%Y-%m-%d"
+    fi
+}
+
 msg() {
     echo >&2 -e "${1-}"
 }
@@ -74,6 +91,7 @@ account filter: Default --auther @me, if not specified bellow
 
 date range:
   -d, --days-ago     since[..until]     Specify the period to filter n days ago
+  -m, --months-ago   since[..until]     Specify the period to filter n months ago (since is the first day, until is the end of the month)
       --since        yyyy-mm-dd         Start date to filter by date
       --until        yyyy-mm-dd         End date to filter by date
 
@@ -216,6 +234,19 @@ parse_params() {
             PRS_DATE_FILTER="merged-at"
             SEARCH_SUBCOMMAND="prs"
             ;;
+        --months-ago | -m )
+            test_empty_param "${2-}"
+            MONTHS_AGO="${2-}"
+            MONTHS_AGO_SINCE="${MONTHS_AGO%%..*}"
+            MONTHS_AGO_UNTIL_="${MONTHS_AGO#"${MONTHS_AGO_SINCE}"}"
+            MONTHS_AGO_UNTIL="${MONTHS_AGO_UNTIL_##*..}"
+            if [ -n "${MONTHS_AGO_SINCE}" ]; then
+                SINCE=$(date_month_first "-${MONTHS_AGO_SINCE}")
+            fi
+            if [ -n "${MONTHS_AGO_UNTIL}" ]; then
+                UNTIL=$(date_month_last "-${MONTHS_AGO_UNTIL}")
+            fi
+            shift ;;
         --owner )
             test_empty_param "${2-}"
             OWNER="${2-}"
