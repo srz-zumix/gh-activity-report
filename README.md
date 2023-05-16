@@ -74,6 +74,7 @@ account filter: Default --auther @me, if not specified bellow
 
 date range:
   -d, --days-ago     since[..until]     Specify the period to filter n days ago
+  -m, --months-ago   since[..until]     Specify the period to filter n months ago (since is the first day, until is the end of the month)
       --since        yyyy-mm-dd         Start date to filter by date
       --until        yyyy-mm-dd         End date to filter by date
 
