@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)
 
-GH_AR_VERSION=0.3
+GH_AR_VERSION=0.4
 DATE_TYPE=
 
 if [ -n "${GH_ACTIVITY_REPORT_DEBUG:-}" ]; then
@@ -164,12 +164,12 @@ parse_params() {
         case "${1-}" in
         --assignee )
             NAME_="${2-}"
-            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             ASSIGNEE=$(append_csv_param "${ASSIGNEE}" "${NAME_-}")
             ;;
         --author )
             NAME_="${2-}"
-            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             AUTHOR=$(append_csv_param "${AUTHOR}" "${NAME_-}")
             ;;
         --created )
@@ -182,7 +182,7 @@ parse_params() {
             ;;
         --commenter )
             NAME_="${2-}"
-            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             COMMENTER=$(append_csv_param "${COMMENTER}" "${NAME_-}")
             ;;
         --days-ago| -d )
@@ -218,7 +218,7 @@ parse_params() {
             shift ;;
         --involves )
             NAME_="${2-}"
-            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             INVOLVES=$(append_csv_param "${INVOLVES}" "${NAME_-}")
             ;;
         --limit| -l )
@@ -226,7 +226,7 @@ parse_params() {
             shift ;;
         --mentions )
             NAME_="${2-}"
-            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             MENTIONS=$(append_csv_param "${MENTIONS}" "${NAME_-}")
             ;;
         --merged )
@@ -260,13 +260,13 @@ parse_params() {
             shift ;;
         --review-requested )
             NAME_="${2-}"
-            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             REVIEW_REQUESTED=$(append_csv_param "${REVIEW_REQUESTED}" "${NAME_-}")
             SEARCH_SUBCOMMAND="prs"
             ;;
         --reviewed-by )
             NAME_="${2-}"
-            (test_empty_or_option_param "${NAME_-}" && shift) || NAME_="@me"
+            if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             REVIEWED_BY=$(append_csv_param "${REVIEWED_BY}" "${NAME_-}")
             SEARCH_SUBCOMMAND="prs"
             ;;
