@@ -57,6 +57,7 @@ update README                 pr    merged  2023-04-21T05:23:27Z  srz-zumix/gh-a
   -R, --repo         [HOST/]OWNER/REPO  Specify search target
       --sort         string             Sort fetched results: {comments|created|interactions|reactions|reactions-+1|reactions--1|reactions-heart|reactions-smile|reactions-tada|reactions-thinking_face|updated} (default "updated")
       --state        string             Filter based on state: {open|closed}
+      --visibility   string             Filter based on repository visibility: {public|private|internal}
   -w, --web                             Open the search query in the web browser
 
 account filter: Default --auther @me, if not specified bellow
