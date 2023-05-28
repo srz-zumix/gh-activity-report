@@ -87,6 +87,7 @@ date filter:
 
 pull_request filter:
   --draft                               Filter based on draft state
+  --review          string              Filter based on review status: {none|required|approved|changes_requested}
 ```
 
 ## Output format

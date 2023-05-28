@@ -104,6 +104,7 @@ date filter:
 
 pull_request filter:
   --draft                               Filter based on draft state
+  --review          string              Filter based on review status: {none|required|approved|changes_requested}
 " "$1"
 }
 
@@ -260,6 +261,11 @@ parse_params() {
             test_empty_param "${2-}"
             REPO="${2-}"
             shift ;;
+        --review )
+            test_empty_param "${2-}"
+            GH_PRS_OPTIONS+=(--review "${2-}")
+            SEARCH_SUBCOMMAND="prs"
+            shift ;;
         --review-requested )
             NAME_="${2-}"
             if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
@@ -295,7 +301,7 @@ parse_params() {
         --visibility )
             test_empty_param "${2-}"
             VISIBILITY="${2-}"
-            ;;
+            shift ;;
         --web| -w )
             GH_OPTIONS+=(--web)
             ;;
