@@ -80,14 +80,20 @@ date range:
       --until        yyyy-mm-dd         End date to filter by date
 
 date filter:
-  --created                             Filter based on created at date
-  --closed                              Filter on closed at date
-  --merged                              Filter on merged at date
-  --updated                             Filter on last updated at date
+  --created-at                          Filter based on created at date
+  --closed-at                           Filter on closed at date
+  --merged-at                           Filter on merged at date
+  --updated-at                          Filter on last updated at date (default)
 
 pull_request filter:
   --draft                               Filter based on draft state
+  --merged                              Filter based on merged state
+  --unmerged                            Filter based on unmerged state
   --review          string              Filter based on review status: {none|required|approved|changes_requested}
+
+exclude filter:
+  --no-owner        string              Exclude repository owner
+  --no-repo         [HOST/]OWNER/REPO   Exclude specify repository
 ```
 
 ## Output format
