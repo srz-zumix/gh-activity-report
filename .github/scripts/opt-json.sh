@@ -6,7 +6,7 @@ SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)
 FIRST_LINE=true
 
 echo "{"
-while read line
+while read -r line
 do
     KEYS=${line%%:*}
     VAL=${line##*:}
