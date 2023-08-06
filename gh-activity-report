@@ -323,7 +323,7 @@ parse_params() {
             test_empty_param "${2-}"
             VISIBILITY="${2-}"
             shift ;;
-        --web| -w ) # option_test([""])
+        --web| -w )
             GH_OPTIONS+=(--web)
             ;;
         --version ) # option_test([""])
