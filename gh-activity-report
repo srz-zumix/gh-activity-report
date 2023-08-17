@@ -68,7 +68,7 @@ usage() {
   -f, --format       string             Output format: [comment|gh|link|list|markdown] (default \"gh\")
   -h, --help                            Show help
       --version                         Show version
-  -l, --limit        number             Maximum number of results to fetch
+  -l, --limit        number             Maximum number of results to fetch [1,1000]
       --owner        string             Filter on repository owner
       --prs                             Search for pull requests
   -R, --repo         [HOST/]OWNER/REPO  Specify search target
@@ -97,14 +97,20 @@ date range:
       --until        yyyy-mm-dd         End date to filter by date
 
 date filter:
-  --created                             Filter based on created at date
-  --closed                              Filter on closed at date
-  --merged                              Filter on merged at date
-  --updated                             Filter on last updated at date
+  --created-at                          Filter based on created at date
+  --closed-at                           Filter on closed at date
+  --merged-at                           Filter on merged at date
+  --updated-at                          Filter on last updated at date (default)
 
 pull_request filter:
   --draft                               Filter based on draft state
+  --merged                              Filter based on merged state
+  --unmerged                            Filter based on unmerged state
   --review          string              Filter based on review status: {none|required|approved|changes_requested}
+
+exclude filter:
+  --no-owner        string              Exclude repository owner
+  --no-repo         [HOST/]OWNER/REPO   Exclude specify repository
 " "$1"
 }
 
@@ -165,30 +171,30 @@ parse_params() {
 
     while :; do
         case "${1-}" in
-        --assignee )
+        --assignee ) # option_test(["", "@me"])
             NAME_="${2-}"
             if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             ASSIGNEE=$(append_csv_param "${ASSIGNEE}" "${NAME_-}")
             ;;
-        --author )
+        --author ) # option_test(["", "@me"])
             NAME_="${2-}"
             if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             AUTHOR=$(append_csv_param "${AUTHOR}" "${NAME_-}")
             ;;
-        --created )
+        --created-at ) # option_test([""])
             PRS_DATE_FILTER="created"
             ISSUES_DATE_FILTER="created"
             ;;
-        --closed )
+        --closed-at ) # option_test([""])
             PRS_DATE_FILTER="closed"
             ISSUES_DATE_FILTER="closed"
             ;;
-        --commenter )
+        --commenter ) # option_test(["", "@me"])
             NAME_="${2-}"
             if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             COMMENTER=$(append_csv_param "${COMMENTER}" "${NAME_-}")
             ;;
-        --days-ago| -d )
+        --days-ago| -d ) # option_test(["1", "366"])
             test_empty_param "${2-}"
             DAYS_AGO="${2-}"
             DAYS_AGO_SINCE="${DAYS_AGO%%..*}"
@@ -201,11 +207,11 @@ parse_params() {
                 UNTIL=$(date_day "-${DAYS_AGO_UNTIL}")
             fi
             shift ;;
-        --draft )
+        --draft ) # option_test([""])
             GH_PRS_OPTIONS+=(--draft)
             SEARCH_SUBCOMMAND="prs"
             ;;
-        --format| -f )
+        --format| -f ) # option_test(["comment", "gh", "link", "list", "markdown"])
             test_empty_param "${2-}"
             case "${2-}" in
             gh ) ;;
@@ -219,25 +225,29 @@ parse_params() {
                 ;;
             esac
             shift ;;
-        --involves )
+        --involves ) # option_test(["", "@me"])
             NAME_="${2-}"
             if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             INVOLVES=$(append_csv_param "${INVOLVES}" "${NAME_-}")
             ;;
-        --limit| -l )
+        --limit| -l ) # option_test(["1"])
             LIMIT="${2-}"
             shift ;;
-        --mentions )
+        --mentions ) # option_test(["", "@me"])
             NAME_="${2-}"
             if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             MENTIONS=$(append_csv_param "${MENTIONS}" "${NAME_-}")
             ;;
-        --merged )
+        --merged ) # option_test([""])
+            GH_PRS_OPTIONS+=("--merged")
+            SEARCH_SUBCOMMAND="prs"
+            ;;
+        --merged-at ) # option_test([""])
             GH_PRS_OPTIONS+=("--merged")
             PRS_DATE_FILTER="merged-at"
             SEARCH_SUBCOMMAND="prs"
             ;;
-        --months-ago | -m )
+        --months-ago| -m ) # option_test(["1", "13"])
             test_empty_param "${2-}"
             MONTHS_AGO="${2-}"
             MONTHS_AGO_SINCE="${MONTHS_AGO%%..*}"
@@ -250,65 +260,76 @@ parse_params() {
                 UNTIL=$(date_month_last "-${MONTHS_AGO_UNTIL}")
             fi
             shift ;;
-        --owner )
+        --no-owner ) # option_test(["srz-zumix"])
+            test_empty_param "${2-}"
+            GH_BYPASS_OPTIONS+=(-user:"${2-}")
+            ;;
+        --no-repo ) # option_test(["srz-zumix/gh-activity-report"])
+            test_empty_param "${2-}"
+            GH_BYPASS_OPTIONS+=(-repo:"${2-}")
+            ;;
+        --owner ) # option_test(["srz-zumix"])
             test_empty_param "${2-}"
             OWNER="${2-}"
             shift ;;
-        --prs )
+        --prs ) # option_test([""])
             SEARCH_SUBCOMMAND="prs"
             ;;
-        --repo| -R )
+        --repo| -R ) # option_test(["srz-zumix/gh-activity-report"])
             test_empty_param "${2-}"
             REPO="${2-}"
             shift ;;
-        --review )
+        --review ) # option_test(["none", "required", "approved", "changes_requested"])
             test_empty_param "${2-}"
             GH_PRS_OPTIONS+=(--review "${2-}")
             SEARCH_SUBCOMMAND="prs"
             shift ;;
-        --review-requested )
+        --review-requested ) # option_test(["", "@me"])
             NAME_="${2-}"
             if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             REVIEW_REQUESTED=$(append_csv_param "${REVIEW_REQUESTED}" "${NAME_-}")
             SEARCH_SUBCOMMAND="prs"
             ;;
-        --reviewed-by )
+        --reviewed-by ) # option_test(["", "@me"])
             NAME_="${2-}"
             if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             REVIEWED_BY=$(append_csv_param "${REVIEWED_BY}" "${NAME_-}")
             SEARCH_SUBCOMMAND="prs"
             ;;
-        --since )
+        --since ) # option_test(["2023-07-14"])
             test_empty_param "${2-}"
             SINCE="${2-}"
             shift ;;
-        --sort )
+        --sort ) # option_test(["comments"])
             test_empty_param "${2-}"
             SORT="${2-}"
             shift ;;
-        --state )
+        --state ) # option_test(["open"])
             test_empty_param "${2-}"
             STATE="${2-}"
             shift ;;
-        --until )
+        --unmerged ) # option_test([""])
+            GH_BYPASS_OPTIONS+=(is:unmerged)
+            ;;
+        --until ) # option_test(["2023-07-14"])
             test_empty_param "${2-}"
             UNTIL="${2-}"
             shift ;;
-        --updated )
+        --updated-at ) # option_test([""])
             PRS_DATE_FILTER="updated"
             ISSUES_DATE_FILTER="updated"
             ;;
-        --visibility )
+        --visibility ) # option_test(["public"])
             test_empty_param "${2-}"
             VISIBILITY="${2-}"
             shift ;;
         --web| -w )
             GH_OPTIONS+=(--web)
             ;;
-        --version )
+        --version ) # option_test([""])
             echo "gh-activity-report version ${GH_AR_VERSION}"
             ;;
-        --help| -h )
+        --help| -h ) # option_test([""])
             usage 0
             ;;
         -- )

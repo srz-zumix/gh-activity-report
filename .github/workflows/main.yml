@@ -20,3 +20,11 @@ jobs:
         run: |
             # diff a.txt b.txt
             diff b.txt c.txt
+
+  option-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: make install
+      - name: Test
+        run: ./.github/scripts/opt-test.sh
