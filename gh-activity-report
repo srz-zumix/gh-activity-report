@@ -263,11 +263,11 @@ parse_params() {
         --no-owner ) # option_test(["srz-zumix"])
             test_empty_param "${2-}"
             GH_BYPASS_OPTIONS+=(-user:"${2-}")
-            ;;
+            shift ;;
         --no-repo ) # option_test(["srz-zumix/gh-activity-report"])
             test_empty_param "${2-}"
             GH_BYPASS_OPTIONS+=(-repo:"${2-}")
-            ;;
+            shift ;;
         --owner ) # option_test(["srz-zumix"])
             test_empty_param "${2-}"
             OWNER="${2-}"
