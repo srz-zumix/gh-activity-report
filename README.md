@@ -88,8 +88,9 @@ date filter:
 pull_request filter:
   --draft                               Filter based on draft state
   --merged                              Filter based on merged state
-  --unmerged                            Filter based on unmerged state
   --review          string              Filter based on review status: {none|required|approved|changes_requested}
+  --sha             string              Filter based on containing SHA. The SHA syntax must be at least seven characters.
+  --unmerged                            Filter based on unmerged state
 
 exclude filter:
   --no-owner        string              Exclude repository owner
