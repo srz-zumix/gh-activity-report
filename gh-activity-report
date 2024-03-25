@@ -300,7 +300,7 @@ parse_params() {
         --sha ) # option_test(["324ddeb"])
             test_empty_param "${2-}"
             SHA="${2-}"
-            GH_BYPASS_OPTIONS+=(sha:${SHA})
+            GH_BYPASS_OPTIONS+=("sha:${SHA}")
             shift ;;
         --since ) # option_test(["2023-07-14"])
             test_empty_param "${2-}"
