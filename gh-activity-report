@@ -342,7 +342,7 @@ parse_params() {
             shift
             INPUT_BYPASS_OPTIONS=("$@")
             break ;;
-        --* )
+        --*| -* )
             echo "${1:-} is invalid option."
             usage 1
             ;;
