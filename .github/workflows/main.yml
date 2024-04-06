@@ -28,5 +28,5 @@ jobs:
       - run: make install
       - name: Test
         env:
-          TEST_SLEEP: 10
+          TEST_SLEEP: 15
         run: ./.github/scripts/opt-test.sh
