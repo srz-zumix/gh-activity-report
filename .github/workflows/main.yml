@@ -11,7 +11,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: make install
       - run: gh activity-report -d 7..3 -f comment | tee a.txt
       - run: gh activity-report --author srz-zumix -d 7..3 -f comment | tee b.txt
@@ -24,9 +24,10 @@ jobs:
   option-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - run: make install
       - name: Test
         env:
           TEST_SLEEP: 15
-        run: ./.github/scripts/opt-test.sh
+        run: |
+          ./.github/scripts/opt-test.sh
