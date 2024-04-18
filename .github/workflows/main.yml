@@ -31,5 +31,6 @@ jobs:
         env:
           TEST_SLEEP: 15
         with:
+          interval: 300
           run: |
             ./.github/scripts/opt-test.sh
