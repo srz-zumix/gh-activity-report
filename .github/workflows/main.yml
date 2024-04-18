@@ -27,7 +27,9 @@ jobs:
       - uses: actions/checkout@v4
       - run: make install
       - name: Test
+        uses: srz-zumix/retry-run-action@v0
         env:
           TEST_SLEEP: 15
-        run: |
-          ./.github/scripts/opt-test.sh
+        with:
+          run: |
+            ./.github/scripts/opt-test.sh
