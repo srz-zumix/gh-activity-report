@@ -14,6 +14,11 @@ recommend
 gh alias set ar activity-report
 ```
 
+## Requirement
+
+* gh
+* Bash >= 4.4
+
 ## Usage
 
 ### List of pull requests and issues created in the last 7 days
@@ -51,6 +56,7 @@ update README                 pr    merged  2023-04-21T05:23:27Z  srz-zumix/gh-a
   -f, --format       string             Output format: [comment|gh|link|list|markdown] (default "gh")
   -h, --help                            Show help
       --version                         Show version
+      --dryrun                          Dryrun, Prints the command to be executed
   -l, --limit        number             Maximum number of results to fetch
       --owner        string             Filter on repository owner
       --prs                             Search for pull requests
