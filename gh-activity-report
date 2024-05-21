@@ -68,6 +68,7 @@ usage() {
   -f, --format       string             Output format: [comment|gh|link|list|markdown] (default \"gh\")
   -h, --help                            Show help
       --version                         Show version
+      --dryrun                          Dryrun, Prints the command to be executed
   -l, --limit        number             Maximum number of results to fetch [1,1000]
       --owner        string             Filter on repository owner
       --prs                             Search for pull requests
@@ -169,6 +170,7 @@ parse_params() {
     SEARCH_SUBCOMMAND="issues"
     FORMAT=
     INPUT_BYPASS_OPTIONS=()
+    DRYRUN=
 
     while :; do
         case "${1-}" in
@@ -211,6 +213,9 @@ parse_params() {
         --draft ) # option_test([""])
             GH_PRS_OPTIONS+=(--draft)
             SEARCH_SUBCOMMAND="prs"
+            ;;
+        --dryrun ) # option_test([""])
+            DRYRUN="true"
             ;;
         --format| -f ) # option_test(["comment", "gh", "link", "list", "markdown"])
             test_empty_param "${2-}"
@@ -462,9 +467,17 @@ fi
 
 search() {
     if [ "${SEARCH_SUBCOMMAND}" = "prs" ]; then
-        gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}" "${GH_BYPASS_OPTIONS[@]}"
+        if [ "${DRYRUN}" == "true" ]; then
+            echo gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}" "${GH_BYPASS_OPTIONS[@]}"
+        else
+            gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}" "${GH_BYPASS_OPTIONS[@]}"
+        fi
     else
-        gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}"  "${GH_BYPASS_OPTIONS[@]}"
+        if [ "${DRYRUN}" == "true" ]; then
+            echo gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}" "${GH_BYPASS_OPTIONS[@]}"
+        else
+            gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}" "${GH_BYPASS_OPTIONS[@]}"
+        fi
     fi
 }
 
