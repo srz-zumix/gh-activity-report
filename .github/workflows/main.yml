@@ -17,12 +17,14 @@ jobs:
       - run: gh activity-report --author srz-zumix -d 7..3 -f comment | tee b.txt
       - run: gh activity-report --author @me --author srz-zumix -d 7..3 -f comment | tee c.txt
       - name: Test Diff
+        if: ${{ github.actor == 'srz-zumix' }}
         run: |
             # diff a.txt b.txt
             diff b.txt c.txt
 
   option-test:
     runs-on: ubuntu-latest
+    if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - uses: actions/checkout@v4
       - run: make install
