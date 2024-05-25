@@ -47,7 +47,7 @@ jobs:
         SEARCH_QUERY: 'repo:${{ github.event.repository.full_name }} is:pr created:${{ env.last_month }}'
 
     - name: Create issue
-      uses: peter-evans/create-issue-from-file@v4
+      uses: peter-evans/create-issue-from-file@v5
       with:
         title: Monthly issue metrics report
         content-filepath: ./issue_metrics.md
