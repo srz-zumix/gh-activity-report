@@ -65,7 +65,7 @@ usage() {
     # shellcheck disable=SC1078
     die "gh-activity-report version ${GH_AR_VERSION}
 
-  -f, --format       string             Output format: [comment|gh|link|list|markdown] (default \"gh\")
+  -f, --format       string             Output format: [comment|gh|lens|lens-with-body|link|list|markdown] (default \"gh\")
   -h, --help                            Show help
       --version                         Show version
       --dryrun                          Dryrun, Prints the command to be executed
