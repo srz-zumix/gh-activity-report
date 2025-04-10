@@ -40,9 +40,11 @@ jobs:
             format/prs/json.keys
 
       - name: Create pull request
+        env:
+          PR_BASE_BRANCHE: ${{ github.event.pull_request.base.ref }}
         run: |
           gh pr create \
-            --base ${{ github.head_ref || github.ref }} \
+            --base ${{ env.PR_BASE_BRANCHE }} \
             --head ${{ env.PR_BRANCH }} \
             --title "Update json.keys" \
             --body "This PR updates the json.keys files for issues and PRs." \
