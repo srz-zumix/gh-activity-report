@@ -14,7 +14,6 @@ jobs:
   update-json-keys:
     runs-on: ubuntu-latest
     env:
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       PR_BRANCH: ci/update-json-keys
     steps:
       - name: Checkout repository
@@ -23,20 +22,29 @@ jobs:
           persist-credentials: false
 
       - name: Update issues/json.keys
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh search issues --json 2>&1 | grep -A 100 -e "--json" | tail -n +2 | xargs -I{} echo -n "{}," | sed 's/,$/\n/' > format/issues/json.keys
 
       - name: Update prs/json.keys
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh search prs --json 2>&1 | grep -A 100 -e "--json" | tail -n +2 | xargs -I{} echo -n "{}," | sed 's/,$/\n/' > format/prs/json.keys
+
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        with:
+          app-id: ${{ secrets.MY_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.MY_ACTIONS_APP_PRIVATE_KEY }}
 
       - name: Commit changes
         uses: suzuki-shunsuke/commit-action@main
         with:
           commit_message: "Update json.keys"
           branch: ${{ env.PR_BRANCH }}
-          app_id: ${{ secrets.MY_ACTIONS_APP_ID }}
-          app_private_key: ${{ secrets.MY_ACTIONS_APP_PRIVATE_KEY }}
+          github_token: ${{ steps.app-token.outputs.token }}
           files: |
             format/issues/json.keys
             format/prs/json.keys
@@ -44,6 +52,7 @@ jobs:
       - name: Create pull request
         env:
           PR_BASE_BRANCHE: ${{ github.head_ref || github.ref_name }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           gh pr create \
             --base ${{ env.PR_BASE_BRANCHE }} \
@@ -53,6 +62,8 @@ jobs:
           || :
 
       - name: Auto-merge enable
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           gh pr merge \
             --auto \
