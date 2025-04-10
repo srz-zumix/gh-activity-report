@@ -65,7 +65,7 @@ usage() {
     # shellcheck disable=SC1078
     die "gh-activity-report version ${GH_AR_VERSION}
 
-  -f, --format       string             Output format: [comment|gh|lens|lens-with-body|link|list|markdown] (default \"gh\")
+  -f, --format       string             Output format: [comment|gh|json|lens|lens-with-body|link|list|markdown] (default \"gh\")
   -h, --help                            Show help
       --version                         Show version
       --dryrun                          Dryrun, Prints the command to be executed
@@ -223,8 +223,8 @@ parse_params() {
             gh ) ;;
             * )
                 FORMAT="${2-}"
-                if [ ! -f "${SCRIPT_DIR}/format/${FORMAT}.template" ] \
-                && [ ! -f "${SCRIPT_DIR}/format/issues/${FORMAT}.template" ]; then
+                if [ ! -f "${SCRIPT_DIR}/format/${FORMAT}.keys" ] \
+                && [ ! -f "${SCRIPT_DIR}/format/issues/${FORMAT}.keys" ]; then
                     echo "error: invalid format type"
                     usage 1
                 fi
@@ -437,14 +437,18 @@ if [ -n "${REVIEWED_BY}" ]; then
 fi
 
 get_format_template() {
-    FORMAT_TEMPLATE=$(cat "${1}/${FORMAT}.template")
     JSON_KEYS=$(cat "${1}/${FORMAT}.keys")
     GH_OPTIONS+=(--json "${JSON_KEYS}")
-    GH_OPTIONS+=(--template "${FORMAT_TEMPLATE}")
+    if [ -f "${1}/${FORMAT}.template" ]; then
+        FORMAT_TEMPLATE=$(cat "${1}/${FORMAT}.template")
+        GH_OPTIONS+=(--template "${FORMAT_TEMPLATE}")
+    else
+        GH_OPTIONS+=(--jq .)
+    fi
 }
     
 if [ -n "${FORMAT}" ]; then
-    if [ -f "${SCRIPT_DIR}/format/${FORMAT}.template" ]; then
+    if [ -f "${SCRIPT_DIR}/format/${FORMAT}.keys" ]; then
         get_format_template "${SCRIPT_DIR}/format"
     else
         get_format_template "${SCRIPT_DIR}/format/${SEARCH_SUBCOMMAND}"

@@ -1,0 +1,57 @@
+name: Update JSON Keys
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs every Sunday at midnight UTC
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-json-keys:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_BRANCH: ci/update-json-keys
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Update issues/json.keys
+        run: |
+          gh search issues --json 2>&1 | grep -A 100 -e "--json" | tail -n +2 | xargs -I{} echo -n "{}," | sed 's/,$/\n/' > format/issues/json.keys
+
+      - name: Update prs/json.keys
+        run: |
+          gh search prs --json 2>&1 | grep -A 100 -e "--json" | tail -n +2 | xargs -I{} echo -n "{}," | sed 's/,$/\n/' > format/prs/json.keys
+
+      - name: Commit changes
+        uses: suzuki-shunsuke/commit-action@main
+        with:
+          commit_message: "Update json.keys"
+          branch: ${{ env.PR_BRANCH }}
+          files: |
+            format/issues/json.keys
+            format/prs/json.keys
+
+      - name: Create pull request
+        run: |
+          gh pr create \
+            --base ${{ github.base_ref || github.ref }} \
+            --head ${{ env.PR_BRANCH }} \
+            --title "Update json.keys" \
+            --body "This PR updates the json.keys files for issues and PRs." \
+          || :
+
+      - name: Auto-merge enable
+        run: |
+          gh pr merge \
+            --auto \
+            --delete-branch \
+            --merge ${{ env.PR_BRANCH }} \
+            || :
