@@ -43,7 +43,7 @@ jobs:
 
       - name: Create pull request
         env:
-          PR_BASE_BRANCHE: ${{ github.event.pull_request.base.ref }}
+          PR_BASE_BRANCHE: ${{ github.head_ref || github.ref_name }}
         run: |
           gh pr create \
             --base ${{ env.PR_BASE_BRANCHE }} \
