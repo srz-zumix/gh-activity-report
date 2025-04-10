@@ -12,6 +12,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: make install
       - run: gh activity-report -d 7..3 -f comment | tee a.txt
       - run: gh activity-report --author srz-zumix -d 7..3 -f comment | tee b.txt
@@ -27,6 +29,8 @@ jobs:
     if: ${{ github.actor != 'dependabot[bot]' }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - run: make install
       - name: Test
         uses: srz-zumix/retry-run-action@v0
