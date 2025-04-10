@@ -42,7 +42,7 @@ jobs:
       - name: Create pull request
         run: |
           gh pr create \
-            --base ${{ github.base_ref || github.ref }} \
+            --base ${{ github.head_ref || github.ref }} \
             --head ${{ env.PR_BRANCH }} \
             --title "Update json.keys" \
             --body "This PR updates the json.keys files for issues and PRs." \
