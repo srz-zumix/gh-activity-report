@@ -63,7 +63,7 @@ jobs:
 
       - name: Auto-merge enable
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           gh pr merge \
             --auto \
