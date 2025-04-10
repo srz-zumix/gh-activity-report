@@ -53,7 +53,7 @@ update README                 pr    merged  2023-04-21T05:23:27Z  srz-zumix/gh-a
 ## Options
 
 ```text
-  -f, --format       string             Output format: [comment|gh|link|list|markdown] (default "gh")
+  -f, --format       string             Output format: [comment|gh|json|lens|lens-with-body|link|list|markdown] (default "gh")
   -h, --help                            Show help
       --version                         Show version
       --dryrun                          Dryrun, Prints the command to be executed

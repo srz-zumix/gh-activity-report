@@ -1,0 +1,81 @@
+name: Update JSON Keys
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs every Sunday at midnight UTC
+  workflow_dispatch:
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update-json-keys:
+    runs-on: ubuntu-latest
+    env:
+      PR_BRANCH: ci/update-json-keys
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Update issues/json.keys
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh search issues --json 2>&1 | grep -A 100 -e "--json" | tail -n +2 | xargs -I{} echo -n "{}," | sed 's/,$/\n/' > format/issues/json.keys
+
+      - name: Update prs/json.keys
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh search prs --json 2>&1 | grep -A 100 -e "--json" | tail -n +2 | xargs -I{} echo -n "{}," | sed 's/,$/\n/' > format/prs/json.keys
+
+      - name: Check Diff
+        id: check-diff
+        run: |
+          git diff --exit-code --cached > "${RUNNER_TEMP}/diff.txt" || echo "diff=1" >> "${GITHUB_OUTPUT}"
+
+      - uses: actions/create-github-app-token@v1
+        id: app-token
+        if: steps.check-diff.outputs.diff == '1'
+        with:
+          app-id: ${{ secrets.MY_ACTIONS_APP_ID }}
+          private-key: ${{ secrets.MY_ACTIONS_APP_PRIVATE_KEY }}
+
+      - name: Commit changes
+        uses: suzuki-shunsuke/commit-action@main
+        if: steps.check-diff.outputs.diff == '1'
+        with:
+          commit_message: "Update json.keys"
+          branch: ${{ env.PR_BRANCH }}
+          github_token: ${{ steps.app-token.outputs.token }}
+          files: |
+            format/issues/json.keys
+            format/prs/json.keys
+
+      - name: Create pull request
+        if: steps.check-diff.outputs.diff == '1'
+        env:
+          PR_BASE_BRANCHE: ${{ github.head_ref || github.ref_name }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh pr create \
+            --base ${{ env.PR_BASE_BRANCHE }} \
+            --head ${{ env.PR_BRANCH }} \
+            --title "Update json.keys" \
+            --body "This PR updates the json.keys files for issues and PRs." \
+          || :
+
+      - name: Auto-merge enable
+        if: steps.check-diff.outputs.diff == '1'
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        run: |
+          gh pr merge \
+            --auto \
+            --delete-branch \
+            --merge ${{ env.PR_BRANCH }} \
+            || :

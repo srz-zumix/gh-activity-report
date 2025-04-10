@@ -1,0 +1,24 @@
+# Activity Report
+
+{{ range $index, $element := . -}}
+-------------------------------------------------------------------------------
+
+## [\[{{ $element.repository.nameWithOwner }}\]: {{ $element.number }} - {{ $element.title }}]({{ $element.url }})
+
+repository: {{ $element.repository.nameWithOwner }}
+number: {{ $element.number }}
+title: {{ $element.title }}
+author: {{ $element.author.login }}
+createdAt: {{ $element.createdAt }}
+updatedAt: {{ $element.updatedAt }}
+closedAt: {{ $element.closedAt }}
+state: {{ $element.state }}
+url: {{ $element.url }}
+
+body:
+
+```
+{{ $element.body }}
+```
+
+{{ end }}
