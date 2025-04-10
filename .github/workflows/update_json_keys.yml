@@ -33,14 +33,21 @@ jobs:
         run: |
           gh search prs --json 2>&1 | grep -A 100 -e "--json" | tail -n +2 | xargs -I{} echo -n "{}," | sed 's/,$/\n/' > format/prs/json.keys
 
+      - name: Check Diff
+        id: check-diff
+        run: |
+          git diff --exit-code --cached > "${RUNNER_TEMP}/diff.txt" || echo "diff=1" >> "${GITHUB_OUTPUT}"
+
       - uses: actions/create-github-app-token@v1
         id: app-token
+        if: steps.check-diff.outputs.diff == '1'
         with:
           app-id: ${{ secrets.MY_ACTIONS_APP_ID }}
           private-key: ${{ secrets.MY_ACTIONS_APP_PRIVATE_KEY }}
 
       - name: Commit changes
         uses: suzuki-shunsuke/commit-action@main
+        if: steps.check-diff.outputs.diff == '1'
         with:
           commit_message: "Update json.keys"
           branch: ${{ env.PR_BRANCH }}
@@ -50,6 +57,7 @@ jobs:
             format/prs/json.keys
 
       - name: Create pull request
+        if: steps.check-diff.outputs.diff == '1'
         env:
           PR_BASE_BRANCHE: ${{ github.head_ref || github.ref_name }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
@@ -62,6 +70,7 @@ jobs:
           || :
 
       - name: Auto-merge enable
+        if: steps.check-diff.outputs.diff == '1'
         env:
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
