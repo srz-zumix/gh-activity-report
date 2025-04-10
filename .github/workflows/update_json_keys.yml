@@ -35,6 +35,8 @@ jobs:
         with:
           commit_message: "Update json.keys"
           branch: ${{ env.PR_BRANCH }}
+          app_id: ${{ secrets.MY_ACTIONS_APP_ID }}
+          app_private_key: ${{ secrets.MY_ACTIONS_APP_PRIVATE_KEY }}
           files: |
             format/issues/json.keys
             format/prs/json.keys
