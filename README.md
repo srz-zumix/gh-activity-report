@@ -105,10 +105,13 @@ exclude filter:
 
 ## Output format
 
-| name     | description |
-|:---------|:------------|
-| comment  | plain text for GitHub issue|pr comment |
-| gh       | gh search (issues\|prs) format |
-| link     | link only |
-| list     | markdown list |
-| markdown | markdown table |
+| name           | description |
+|:---------------|:------------|
+| comment        | plain text for GitHub issue\|pr comment |
+| gh             | gh search issues\|prs format |
+| json           | Outputs all key-value pairs in JSON format |
+| lens           | PR summary in plain text |
+| lens-with-body | PR summary and description in plain text |
+| link           | link only |
+| list           | markdown list |
+| markdown       | markdown table |
