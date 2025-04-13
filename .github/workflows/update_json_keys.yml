@@ -15,6 +15,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       PR_BRANCH: ci/update-json-keys
+      PR_BASE_BRANCHE: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -46,11 +47,12 @@ jobs:
           private-key: ${{ secrets.MY_ACTIONS_APP_PRIVATE_KEY }}
 
       - name: Commit changes
-        uses: suzuki-shunsuke/commit-action@main
+        uses: suzuki-shunsuke/commit-action@cc96d3a3fd959d05e9b79ca395eb30b835aeba24 # v0.0.7
         if: steps.check-diff.outputs.diff == '1'
         with:
           commit_message: "Update json.keys"
           branch: ${{ env.PR_BRANCH }}
+          parent_branch: ${{ env.PR_BASE_BRANCHE}}
           github_token: ${{ steps.app-token.outputs.token }}
           files: |
             format/issues/json.keys
@@ -59,7 +61,6 @@ jobs:
       - name: Create pull request
         if: steps.check-diff.outputs.diff == '1'
         env:
-          PR_BASE_BRANCHE: ${{ github.head_ref || github.ref_name }}
           GH_TOKEN: ${{ steps.app-token.outputs.token }}
         run: |
           gh pr create \
