@@ -39,7 +39,7 @@ jobs:
         run: |
           git diff --exit-code --cached > "${RUNNER_TEMP}/diff.txt" || echo "diff=1" >> "${GITHUB_OUTPUT}"
 
-      - uses: actions/create-github-app-token@v1
+      - uses: actions/create-github-app-token@v2
         id: app-token
         if: steps.check-diff.outputs.diff == '1'
         with:
