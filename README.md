@@ -56,7 +56,7 @@ update README                 pr    merged  2023-04-21T05:23:27Z  srz-zumix/gh-a
   -f, --format       string             Output format: [comment|gh|json|lens|lens-with-body|link|list|markdown] (default "gh")
   -h, --help                            Show help
       --version                         Show version
-      --dryrun                          Dryrun, Prints the command to be executed
+  -n, --dryrun                          Dryrun, Prints the command to be executed
   -l, --limit        number             Maximum number of results to fetch
       --owner        string             Filter on repository owner
       --prs                             Search for pull requests
@@ -80,10 +80,11 @@ account filter: Default --auther @me, if not specified bellow
    (defaults to \"@me\" if not specified [name])
 
 date range:
-  -d, --days-ago     since[..until]     Specify the period to filter n days ago
-  -m, --months-ago   since[..until]     Specify the period to filter n months ago (since is the first day, until is the end of the month)
+  -d, --days-ago     since[..until]     Specify the span to filter n days ago
+  -m, --months-ago   since[..until]     Specify the span to filter n months ago (since is the first day, until is the end of the month)
       --since        yyyy-mm-dd         Start date to filter by date
       --until        yyyy-mm-dd         End date to filter by date
+      --date         since[..until]     Specify the span to filter by a custom date range (format: yyyy-mm-dd)
 
 date filter:
   --created-at                          Filter based on created at date
