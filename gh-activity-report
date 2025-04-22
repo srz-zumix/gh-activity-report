@@ -68,7 +68,7 @@ usage() {
   -f, --format       string             Output format: [comment|gh|json|lens|lens-with-body|link|list|markdown] (default \"gh\")
   -h, --help                            Show help
       --version                         Show version
-      --dryrun                          Dryrun, Prints the command to be executed
+  -n, --dryrun                          Dryrun, Prints the command to be executed
   -l, --limit        number             Maximum number of results to fetch [1,1000]
       --owner        string             Filter on repository owner
       --prs                             Search for pull requests
@@ -92,10 +92,11 @@ account filter: Default --auther @me, if not specified bellow
    (defaults to \"@me\" if not specified [name])
 
 date range:
-  -d, --days-ago     since[..until]     Specify the period to filter n days ago
-  -m, --months-ago   since[..until]     Specify the period to filter n months ago (since is the first day, until is the end of the month)
+  -d, --days-ago     since[..until]     Specify the span to filter n days ago
+  -m, --months-ago   since[..until]     Specify the span to filter n months ago (since is the first day, until is the end of the month)
       --since        yyyy-mm-dd         Start date to filter by date
       --until        yyyy-mm-dd         End date to filter by date
+      --date         since[..until]     Specify the span to filter by a custom date range (format: yyyy-mm-dd)
 
 date filter:
   --created-at                          Filter based on created at date
@@ -197,12 +198,19 @@ parse_params() {
             if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             COMMENTER=$(append_csv_param "${COMMENTER}" "${NAME_-}")
             ;;
+        --date ) # option_test(["2023-01-01..2023-12-31"])
+            test_empty_param "${2-}"
+            DATE_RANGE="${2-}"
+            SINCE="${DATE_RANGE%%..*}"
+            UNTIL="${DATE_RANGE##*..}"
+            [ "${UNTIL}" == "${DATE_RANGE}" ] && UNTIL=""
+            shift ;;
         --days-ago| -d ) # option_test(["1", "366"])
             test_empty_param "${2-}"
             DAYS_AGO="${2-}"
             DAYS_AGO_SINCE="${DAYS_AGO%%..*}"
-            DAYS_AGO_UNTIL_="${DAYS_AGO#"${DAYS_AGO_SINCE}"}"
-            DAYS_AGO_UNTIL="${DAYS_AGO_UNTIL_##*..}"
+            DAYS_AGO_UNTIL="${DAYS_AGO##*..}"
+            [ "${DAYS_AGO_UNTIL}" == "${DAYS_AGO}" ] && DAYS_AGO_UNTIL=""
             if [ -n "${DAYS_AGO_SINCE}" ]; then
                 SINCE=$(date_day "-${DAYS_AGO_SINCE}")
             fi
@@ -214,7 +222,7 @@ parse_params() {
             GH_PRS_OPTIONS+=(--draft)
             SEARCH_SUBCOMMAND="prs"
             ;;
-        --dryrun ) # option_test([""])
+        --dryrun| -n ) # option_test([""])
             DRYRUN="true"
             ;;
         --format| -f ) # option_test(["comment", "gh", "link", "list", "markdown"])
@@ -257,8 +265,8 @@ parse_params() {
             test_empty_param "${2-}"
             MONTHS_AGO="${2-}"
             MONTHS_AGO_SINCE="${MONTHS_AGO%%..*}"
-            MONTHS_AGO_UNTIL_="${MONTHS_AGO#"${MONTHS_AGO_SINCE}"}"
-            MONTHS_AGO_UNTIL="${MONTHS_AGO_UNTIL_##*..}"
+            MONTHS_AGO_UNTIL="${MONTHS_AGO##*..}"
+            [ "${MONTHS_AGO_UNTIL}" == "${MONTHS_AGO}" ] && MONTHS_AGO_UNTIL=""
             if [ -n "${MONTHS_AGO_SINCE}" ]; then
                 SINCE=$(date_month_first "-${MONTHS_AGO_SINCE}")
             fi
