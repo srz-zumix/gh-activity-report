@@ -50,6 +50,37 @@ date_month_last() {
     fi
 }
 
+parse_fy() {
+    FY_YEAR="${1:0:2}"
+    FY_PERIOD="${1:2:2}"
+    if [ -z "${FY_PERIOD}" ]; then
+        echo "20${FY_YEAR}-04-01..20$((${FY_YEAR} + 1))-03-31"
+    fi
+    case "${FY_PERIOD}" in
+    H1 )
+        echo "20${FY_YEAR}-04-01..20${FY_YEAR}-09-30"
+        ;;
+    H2 )
+        echo "20${FY_YEAR}-10-01..20$((${FY_YEAR} + 1))-03-31"
+        ;;
+    Q1 )
+        echo "20${FY_YEAR}-04-01..20${FY_YEAR}-06-30"
+        ;;
+    Q2 )
+        echo "20${FY_YEAR}-07-01..20${FY_YEAR}-09-30"
+        ;;
+    Q3 )
+        echo "20${FY_YEAR}-10-01..20${FY_YEAR}-12-31"
+        ;;
+    Q4 )
+        echo "20${FY_YEAR}-01-01..20${FY_YEAR}-03-31"
+        ;;
+    * )
+        echo ""
+        ;;
+    esac
+}
+
 msg() {
     echo >&2 -e "${1-}"
 }
@@ -246,15 +277,29 @@ parse_params() {
             FY_SINCE="${FY%%..*}"
             FY_UNTIL="${FY##*..}"
             [ "${FY_UNTIL}" == "${FY}" ] && FY_UNTIL=""
-            if [ -z "${FY_UNTIL}" ]; then
-                FY_UNTIL="${FY_SINCE}"
-            fi
             if [ -z "${FY_SINCE}" ]; then
                 FY_SINCE="${FY_UNTIL}"
             fi
-            SINCE="20${FY_SINCE}-04-01"
-            FY_UNTIL_YEAR=$((${FY_UNTIL} + 1))
-            UNTIL="20${FY_UNTIL_YEAR}-03-31"
+            if [ -z "${FY_SINCE}" ]; then
+                echo "error: fiscal year must be specified"
+                usage 1
+            fi
+
+            PARSED_FY_SINCE=$(parse_fy "${FY_SINCE}")
+            if [ -z "${PARSED_FY_SINCE}" ]; then
+                echo "error: invalid fiscal year format"
+                usage 1
+            fi
+            SINCE="${PARSED_FY_SINCE%%..*}"
+            UNTIL="${PARSED_FY_SINCE##*..}"
+            if [ -n "${FY_UNTIL}" ]; then
+                PARSED_FY_UNTIL=$(parse_fy "${FY_SINCE}")
+                if [ -z "${PARSED_FY_UNTIL}" ]; then
+                    echo "error: invalid fiscal year format"
+                    usage 1
+                fi
+                UNTIL="${PARSED_FY_UNTIL##*..}"
+            fi
             shift ;;
         --involves ) # option_test(["", "@me"])
             NAME_="${2-}"
