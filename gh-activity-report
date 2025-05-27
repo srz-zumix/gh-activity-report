@@ -271,7 +271,7 @@ parse_params() {
                 ;;
             esac
             shift ;;
-        --fy ) # option_test(["23", "23..24"])
+        --fy ) # option_test(["23", "23..24", "24H1"])
             test_empty_param "${2-}"
             FY="${2-}"
             FY_SINCE="${FY%%..*}"
