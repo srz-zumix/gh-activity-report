@@ -54,14 +54,14 @@ parse_fy() {
     FY_YEAR="${1:0:2}"
     FY_PERIOD="${1:2:2}"
     if [ -z "${FY_PERIOD}" ]; then
-        echo "20${FY_YEAR}-04-01..20$((${FY_YEAR} + 1))-03-31"
+        echo "20${FY_YEAR}-04-01..20$((FY_YEAR + 1))-03-31"
     fi
     case "${FY_PERIOD}" in
     H1 )
         echo "20${FY_YEAR}-04-01..20${FY_YEAR}-09-30"
         ;;
     H2 )
-        echo "20${FY_YEAR}-10-01..20$((${FY_YEAR} + 1))-03-31"
+        echo "20${FY_YEAR}-10-01..20$((FY_YEAR + 1))-03-31"
         ;;
     Q1 )
         echo "20${FY_YEAR}-04-01..20${FY_YEAR}-06-30"
