@@ -50,6 +50,37 @@ date_month_last() {
     fi
 }
 
+parse_fy() {
+    FY_YEAR="${1:0:2}"
+    FY_PERIOD="${1:2:2}"
+    if [ -z "${FY_PERIOD}" ]; then
+        echo "20${FY_YEAR}-04-01..20$((FY_YEAR + 1))-03-31"
+    fi
+    case "${FY_PERIOD}" in
+    H1 )
+        echo "20${FY_YEAR}-04-01..20${FY_YEAR}-09-30"
+        ;;
+    H2 )
+        echo "20${FY_YEAR}-10-01..20$((FY_YEAR + 1))-03-31"
+        ;;
+    Q1 )
+        echo "20${FY_YEAR}-04-01..20${FY_YEAR}-06-30"
+        ;;
+    Q2 )
+        echo "20${FY_YEAR}-07-01..20${FY_YEAR}-09-30"
+        ;;
+    Q3 )
+        echo "20${FY_YEAR}-10-01..20${FY_YEAR}-12-31"
+        ;;
+    Q4 )
+        echo "20${FY_YEAR}-01-01..20${FY_YEAR}-03-31"
+        ;;
+    * )
+        echo ""
+        ;;
+    esac
+}
+
 msg() {
     echo >&2 -e "${1-}"
 }
@@ -97,6 +128,7 @@ date range:
       --since        yyyy-mm-dd         Start date to filter by date
       --until        yyyy-mm-dd         End date to filter by date
       --date         since[..until]     Specify the span to filter by a custom date range (format: yyyy-mm-dd)
+      --fy           since[..until]     Specify the span to filter by fiscal year (format: YY)
 
 date filter:
   --created-at                          Filter based on created at date
@@ -238,6 +270,36 @@ parse_params() {
                 fi
                 ;;
             esac
+            shift ;;
+        --fy ) # option_test(["23", "23..24", "24H1"])
+            test_empty_param "${2-}"
+            FY="${2-}"
+            FY_SINCE="${FY%%..*}"
+            FY_UNTIL="${FY##*..}"
+            [ "${FY_UNTIL}" == "${FY}" ] && FY_UNTIL=""
+            if [ -z "${FY_SINCE}" ]; then
+                FY_SINCE="${FY_UNTIL}"
+            fi
+            if [ -z "${FY_SINCE}" ]; then
+                echo "error: fiscal year must be specified"
+                usage 1
+            fi
+
+            PARSED_FY_SINCE=$(parse_fy "${FY_SINCE}")
+            if [ -z "${PARSED_FY_SINCE}" ]; then
+                echo "error: invalid fiscal year format"
+                usage 1
+            fi
+            SINCE="${PARSED_FY_SINCE%%..*}"
+            UNTIL="${PARSED_FY_SINCE##*..}"
+            if [ -n "${FY_UNTIL}" ]; then
+                PARSED_FY_UNTIL=$(parse_fy "${FY_SINCE}")
+                if [ -z "${PARSED_FY_UNTIL}" ]; then
+                    echo "error: invalid fiscal year format"
+                    usage 1
+                fi
+                UNTIL="${PARSED_FY_UNTIL##*..}"
+            fi
             shift ;;
         --involves ) # option_test(["", "@me"])
             NAME_="${2-}"
