@@ -3,7 +3,7 @@
 {{ range $index, $element := . -}}
 -------------------------------------------------------------------------------
 
-## [\[{{ $element.repository.nameWithOwner }}\]: {{ $element.number }} - {{ $element.title }}]({{ $element.url }})
+## [{{ $element.repository.nameWithOwner }}]: {{ $element.number }} - {{ $element.title }}
 
 repository: {{ $element.repository.nameWithOwner }}
 number: {{ $element.number }}
