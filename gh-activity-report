@@ -73,7 +73,8 @@ parse_fy() {
         echo "20${FY_YEAR}-10-01..20${FY_YEAR}-12-31"
         ;;
     Q4 )
-        echo "20${FY_YEAR}-01-01..20${FY_YEAR}-03-31"
+        FY_NEXT_YEAR=$((FY_YEAR + 1))
+        echo "20${FY_NEXT_YEAR}-01-01..20${FY_NEXT_YEAR}-03-31"
         ;;
     * )
         echo ""
