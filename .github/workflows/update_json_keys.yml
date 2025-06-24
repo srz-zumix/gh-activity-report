@@ -47,7 +47,7 @@ jobs:
           private-key: ${{ secrets.MY_ACTIONS_APP_PRIVATE_KEY }}
 
       - name: Commit changes
-        uses: suzuki-shunsuke/commit-action@cc96d3a3fd959d05e9b79ca395eb30b835aeba24 # v0.0.7
+        uses: suzuki-shunsuke/commit-action@e3299afe2e5ffb76f1987743e3dbc0f00ece72d8 # v0.0.8
         if: steps.check-diff.outputs.diff == '1'
         with:
           commit_message: "Update json.keys"
