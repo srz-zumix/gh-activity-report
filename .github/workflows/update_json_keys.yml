@@ -18,7 +18,7 @@ jobs:
       PR_BASE_BRANCHE: ${{ github.head_ref || github.ref_name }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           persist-credentials: false
 
