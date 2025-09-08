@@ -1,0 +1,22 @@
+name: Zsh Test
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install zsh
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y zsh
+      - name: Install gh extension
+        run: make install
+      - name: Run test
+        run: zsh .github/scripts/zsh-test.sh

@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)
+if [ -n "${ZSH_VERSION-}" ]; then
+    SCRIPT_DIR="${0:A:h}"
+else
+    SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)
+fi
 
 GH_AR_VERSION=1.1
 DATE_TYPE=
