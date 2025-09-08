@@ -1,0 +1,49 @@
+name: Test on old bash
+on:
+  pull_request:
+
+permissions: read-all
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container:
+      image: ubuntu:16.04
+    steps:
+      - name: Check bash version
+        run: bash --version
+
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Install Dependencies
+        run: |
+          apt-get update
+          apt-get install -y apt-utils curl git
+
+      - name: Install gh CLI
+        run: |
+          curl -L https://github.com/cli/cli/releases/download/v2.14.3/gh_2.14.3_linux_amd64.deb -o gh.deb
+          dpkg -i gh.deb
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - run: make install
+      - run: gh activity-report -d 7..3 -f comment | tee a.txt
+      - run: gh activity-report --author srz-zumix -d 7..3 -f comment | tee b.txt
+      - run: gh activity-report --author @me --author srz-zumix -d 7..3 -f comment | tee c.txt
+      - name: Test Diff
+        if: ${{ github.actor == 'srz-zumix' }}
+        run: |
+            # diff a.txt b.txt
+            diff b.txt c.txt
+
+      - name: Test Options
+        uses: srz-zumix/retry-run-action@v0
+        env:
+          TEST_SLEEP: 15
+        with:
+          interval: 300
+          run: |
+            ./.github/scripts/opt-test.sh
