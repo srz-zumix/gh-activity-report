@@ -40,3 +40,13 @@ jobs:
           interval: 300
           run: |
             ./.github/scripts/opt-test.sh
+
+  unbound-variable-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - run: make install
+      - name: 'Run gh-activity-report with --no-repo'
+        run: gh-activity-report --no-repo "some/repo"
