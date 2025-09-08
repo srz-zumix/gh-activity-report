@@ -14,11 +14,6 @@ recommend
 gh alias set ar activity-report
 ```
 
-## Requirement
-
-* gh
-* Bash >= 4.4
-
 ## Usage
 
 ### List of pull requests and issues created in the last 7 days
