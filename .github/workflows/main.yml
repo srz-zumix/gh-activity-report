@@ -40,3 +40,13 @@ jobs:
           interval: 300
           run: |
             ./.github/scripts/opt-test.sh
+
+  old-bash-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - name: Run ubuntu 16.04
+        run: |
+          docker run --rm -v $(pwd):/work -w /work ubuntu:16.04 ./.github/scripts/syntax-check.sh
