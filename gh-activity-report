@@ -155,6 +155,29 @@ declare -a GH_PRS_OPTIONS
 declare -a GH_ISSUES_OPTIONS
 GH_BYPASS_OPTIONS=()
 
+# default values of variables set from params
+SINCE=
+UNTIL=
+AUTHOR=
+ASSIGNEE=
+INVOLVES=
+MENTIONS=
+COMMENTER=
+REVIEW_REQUESTED=
+REVIEWED_BY=
+PRS_DATE_FILTER="updated"
+ISSUES_DATE_FILTER="updated"
+LIMIT=
+OWNER=
+REPO=
+SORT="updated"
+STATE=
+VISIBILITY=
+SEARCH_SUBCOMMAND="issues"
+FORMAT=
+INPUT_BYPASS_OPTIONS=()
+DRYRUN=
+
 resolve_username() {
     if "${GITHUB_ACTIONS:-false}"; then
         case "${1-}" in
@@ -183,29 +206,6 @@ test_empty_param() {
 }
 
 parse_params() {
-    # default values of variables set from params
-    SINCE=
-    UNTIL=
-    AUTHOR=
-    ASSIGNEE=
-    INVOLVES=
-    MENTIONS=
-    COMMENTER=
-    REVIEW_REQUESTED=
-    REVIEWED_BY=
-    PRS_DATE_FILTER="updated"
-    ISSUES_DATE_FILTER="updated"
-    LIMIT=
-    OWNER=
-    REPO=
-    SORT="updated"
-    STATE=
-    VISIBILITY=
-    SEARCH_SUBCOMMAND="issues"
-    FORMAT=
-    INPUT_BYPASS_OPTIONS=()
-    DRYRUN=
-
     while :; do
         case "${1-}" in
         --assignee ) # option_test(["", "@me"])
