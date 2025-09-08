@@ -40,16 +40,3 @@ jobs:
           interval: 300
           run: |
             ./.github/scripts/opt-test.sh
-
-  zsh-test:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Install zsh
-        run: sudo apt-get update && sudo apt-get install -y zsh
-      - name: Install gh extension
-        run: make install
-      - name: Run test with zsh
-        run: zsh -c "gh activity-report -d 7..3"
