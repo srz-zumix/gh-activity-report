@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)
 
-GH_AR_VERSION=1.1
+GH_AR_VERSION=1.2
 DATE_TYPE=
 
 if [ -n "${GH_ACTIVITY_REPORT_DEBUG:-}" ]; then
@@ -536,22 +536,27 @@ is_contains() {
     return 1
 }
 
+TRAILING_OPTIONS=()
+if [ "${#INPUT_BYPASS_OPTIONS[@]}" != 0 ]; then
+    TRAILING_OPTIONS+=("${INPUT_BYPASS_OPTIONS[@]}")
+fi
 if [ "${#GH_BYPASS_OPTIONS[@]}" != 0 ]; then
-    is_contains "--" "${INPUT_BYPASS_OPTIONS[@]}" "" || INPUT_BYPASS_OPTIONS+=(--)
+    is_contains "--" "${TRAILING_OPTIONS[@]+${TRAILING_OPTIONS[@]}}" "" || TRAILING_OPTIONS+=(--)
+    TRAILING_OPTIONS+=("${GH_BYPASS_OPTIONS[@]}")
 fi
 
 search() {
     if [ "${SEARCH_SUBCOMMAND}" = "prs" ]; then
         if [ "${DRYRUN}" == "true" ]; then
-            echo gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}" "${GH_BYPASS_OPTIONS[@]}"
+            echo gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${TRAILING_OPTIONS[@]+${TRAILING_OPTIONS[@]}}"
         else
-            gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}" "${GH_BYPASS_OPTIONS[@]}"
+            gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${TRAILING_OPTIONS[@]+${TRAILING_OPTIONS[@]}}"
         fi
     else
         if [ "${DRYRUN}" == "true" ]; then
-            echo gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}" "${GH_BYPASS_OPTIONS[@]}"
+            echo gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${TRAILING_OPTIONS[@]+${TRAILING_OPTIONS[@]}}"
         else
-            gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${INPUT_BYPASS_OPTIONS[@]}" "${GH_BYPASS_OPTIONS[@]}"
+            gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${TRAILING_OPTIONS[@]+${TRAILING_OPTIONS[@]}}"
         fi
     fi
 }
