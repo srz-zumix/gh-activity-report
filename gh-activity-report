@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR=$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" &>/dev/null && pwd -P)
 
-GH_AR_VERSION=1.1
+GH_AR_VERSION=1.2
 DATE_TYPE=
 
 if [ -n "${GH_ACTIVITY_REPORT_DEBUG:-}" ]; then
