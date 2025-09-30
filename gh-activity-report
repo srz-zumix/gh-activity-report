@@ -118,7 +118,7 @@ account filter: Default --auther @me, if not specified bellow
   --commenter        [name]             Filter based on comments by user
   --involves         [name]             Filter based on involvement of user
   --mentions         [name]             Filter based on user mentions
-  --review-requested [name]             Filter based on comments by user
+  --review-requested [name]             Filter on user or team requested to revie
   --reviewed-by      [name]             Filter on user who reviewed
 
    (defaults to \"@me\" if not specified [name])
