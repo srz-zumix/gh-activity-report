@@ -147,6 +147,7 @@ pull_request filter:
 exclude filter:
   --no-owner        string              Exclude repository owner
   --no-repo         [HOST/]OWNER/REPO   Exclude specify repository
+  --no-author       string              Exclude author
 " "$1"
 }
 
@@ -337,6 +338,11 @@ parse_params() {
                 UNTIL=$(date_month_last "-${MONTHS_AGO_UNTIL}")
             fi
             shift ;;
+        --no-author ) # option_test(["@me"])
+            NAME_="${2-}"
+            if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
+            GH_BYPASS_OPTIONS+=(-author:"${NAME_-}")
+            ;;
         --no-owner ) # option_test(["srz-zumix"])
             test_empty_param "${2-}"
             GH_BYPASS_OPTIONS+=(-user:"${2-}")
