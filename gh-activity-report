@@ -130,6 +130,7 @@ date range:
       --until        yyyy-mm-dd         End date to filter by date
       --date         since[..until]     Specify the span to filter by a custom date range (format: yyyy-mm-dd)
       --fy           since[..until]     Specify the span to filter by fiscal year (format: YY,YYH[1-2],YYQ[1-4])
+      --year         yyyy[..yyyy]       Specify the span to filter by year (format: yyyy)
 
 date filter:
   --created-at                          Filter based on created at date
@@ -414,6 +415,19 @@ parse_params() {
         --web| -w )
             GH_OPTIONS+=(--web)
             ;;
+        --year ) # option_test(["2023", "2023..2024"])
+            test_empty_param "${2-}"
+            YEAR="${2-}"
+            YEAR_SINCE="${YEAR%%..*}"
+            YEAR_UNTIL="${YEAR##*..}"
+            [ "${YEAR_UNTIL}" == "${YEAR}" ] && YEAR_UNTIL=""
+            if [ -n "${YEAR_SINCE}" ]; then
+                SINCE="${YEAR_SINCE}-01-01"
+            fi
+            if [ -n "${YEAR_UNTIL}" ]; then
+                UNTIL="${YEAR_UNTIL}-12-31"
+            fi
+            shift ;;
         --version ) # option_test([""])
             echo "gh-activity-report version ${GH_AR_VERSION}"
             ;;
