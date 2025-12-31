@@ -81,6 +81,7 @@ date range:
       --until        yyyy-mm-dd         End date to filter by date
       --date         since[..until]     Specify the span to filter by a custom date range (format: yyyy-mm-dd)
       --fy           since[..until]     Specify the span to filter by fiscal year (format: YY,YYH[1-2],YYQ[1-4])
+      --year         yyyy[..yyyy]       Specify the span to filter by year (format: yyyy)
 
 date filter:
   --created-at                          Filter based on created at date
