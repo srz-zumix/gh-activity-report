@@ -33,7 +33,7 @@ jobs:
           persist-credentials: false
       - run: make install
       - name: Test
-        uses: srz-zumix/retry-run-action@v0
+        uses: srz-zumix/retry-run-action@40be8edc05d941572a6238c37c629cc408014d10 # v0.3.0
         env:
           TEST_SLEEP: 15
         with:
