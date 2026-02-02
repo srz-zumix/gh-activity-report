@@ -57,5 +57,5 @@
 [tagpr]
 	vPrefix = true
 	releaseBranch = main
-	versionFile = gh-associated-pr
+	versionFile = gh-activity-report
 	release = true
