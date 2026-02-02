@@ -430,6 +430,7 @@ parse_params() {
             shift ;;
         --version ) # option_test([""])
             echo "gh-activity-report version ${GH_AR_VERSION}"
+            exit 0
             ;;
         --help| -h ) # option_test([""])
             usage 0
