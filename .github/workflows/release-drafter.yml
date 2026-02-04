@@ -66,7 +66,7 @@ jobs:
         run: |
           gh pr create \
             --base main \
-            --head ci/update-version-${VERSION} \
+            --head "ci/update-version-${VERSION}" \
             --title "Update version to ${VERSION}" \
             --body "This PR updates the gh-activity-report version to ${VERSION}." \
           || :
