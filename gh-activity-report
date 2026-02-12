@@ -102,6 +102,7 @@ usage() {
       --version                         Show version
   -n, --dryrun                          Dryrun, Prints the command to be executed
   -l, --limit        number             Maximum number of results to fetch [1,1000]
+      --host         string             Specify GitHub instance host (default: github.com)
       --owner        string             Filter on repository owner
       --prs                             Search for pull requests
   -R, --repo         [HOST/]OWNER/REPO  Specify search target
@@ -110,7 +111,7 @@ usage() {
       --visibility   string             Filter based on repository visibility: {public|private|internal}
   -w, --web                             Open the search query in the web browser
 
-account filter: Default --auther @me, if not specified bellow
+account filter: Default --author @me, if not specified below
                 Account filters can be specified multiple times.
                 In that case, it becomes an OR condition
   --assignee         [name]             Filter by assignee
@@ -207,6 +208,7 @@ parse_params() {
     FORMAT=
     INPUT_BYPASS_OPTIONS=()
     DRYRUN=
+    HOSTNAME="${GH_HOST:-github.com}"
 
     while :; do
         case "${1-}" in
@@ -303,6 +305,10 @@ parse_params() {
                 fi
                 UNTIL="${PARSED_FY_UNTIL##*..}"
             fi
+            shift ;;
+        --host )
+            test_empty_param "${2-}"
+            HOSTNAME="${2-}"
             shift ;;
         --involves ) # option_test(["", "@me"])
             NAME_="${2-}"
@@ -571,13 +577,13 @@ search() {
         if [ "${DRYRUN}" == "true" ]; then
             echo gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${TRAILING_OPTIONS[@]+${TRAILING_OPTIONS[@]}}"
         else
-            gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${TRAILING_OPTIONS[@]+${TRAILING_OPTIONS[@]}}"
+            GH_HOST="${HOSTNAME}" gh search prs "${GH_OPTIONS[@]}" "${GH_PRS_OPTIONS[@]}" "${TRAILING_OPTIONS[@]+${TRAILING_OPTIONS[@]}}"
         fi
     else
         if [ "${DRYRUN}" == "true" ]; then
             echo gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${TRAILING_OPTIONS[@]+${TRAILING_OPTIONS[@]}}"
         else
-            gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${TRAILING_OPTIONS[@]+${TRAILING_OPTIONS[@]}}"
+            GH_HOST="${HOSTNAME}" gh search issues --include-prs "${GH_OPTIONS[@]}" "${GH_ISSUES_OPTIONS[@]}" "${TRAILING_OPTIONS[@]+${TRAILING_OPTIONS[@]}}"
         fi
     fi
 }
