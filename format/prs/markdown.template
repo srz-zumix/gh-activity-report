@@ -1,12 +1,12 @@
 | TITLE | STATE | UPDATE | LINK |
 |:------|:-----|:------|:-------|
 {{ range $index, $element := . -}}
-| {{ $element.title }}| {{ $element.state }}| {{ $element.updatedAt }}| [{{ $element.repository.nameWithOwner }}#{{ $element.number }}]({{ $element.url }}) |
+| {{ $element.title }} | {{ $element.state }} | {{ $element.updatedAt }} | [{{ $element.repository.nameWithOwner }}#{{ $element.number }}]({{ $element.url }}) |
 {{ end }}
 {{- /* I want a tablerow that does not truncate
 {{- tablerow "| TITLE" "| STATE" "| UPDATE" "| LINK" "|" -}}
 {{- tablerow "|:-----" "|:-----" "|:-----" "|:-----" "|" -}}
 {{- range $index, $element := . -}}
-{{- tablerow (printf "| %s" $element.title) (printf "| %s" $element.state) (printf "| %s" $element.updatedAt) (printf "| [%s#%.f](%s)" $element.repository.nameWithOwner $element.number $element.url) "|" -}}
+{{- tablerow (printf "| %s" $element.title) (printf "| %s" $element.state) (printf "| %s" $element.updatedAt) (printf "| [%s#%.f](%s)" $element.repository.nameWithOwner $element.number $element.url) " |" -}}
 {{- end -}}{{ tablerender }}
 */ -}}
