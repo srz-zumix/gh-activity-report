@@ -43,7 +43,7 @@ jobs:
         id: app-token
         if: steps.check-diff.outputs.diff == '1'
         with:
-          app-id: ${{ secrets.MY_ACTIONS_APP_ID }}
+          client-id: ${{ secrets.MY_ACTIONS_APP_CLIENT_ID }}
           private-key: ${{ secrets.MY_ACTIONS_APP_PRIVATE_KEY }}
 
       - name: Commit changes
