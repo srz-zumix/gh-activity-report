@@ -55,6 +55,7 @@ jobs:
           branch: ci/update-version-${{ steps.update-version.outputs.version }}
           parent_branch: main
           github_token: ${{ steps.app-token.outputs.token }}
+          force_push: true
           files: |
             gh-activity-report
 
