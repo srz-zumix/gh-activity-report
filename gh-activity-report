@@ -220,11 +220,14 @@ parse_params() {
             ;;
         --author ) # option_test(["", "@me", "@all"])
             NAME_="${2-}"
-            if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             if [ "${NAME_}" = "@all" ]; then
+                shift
                 AUTHOR_ALL="true"
-            else
+            elif test_empty_or_option_param "${NAME_-}"; then
+                shift
                 AUTHOR=$(append_csv_param "${AUTHOR}" "${NAME_-}")
+            else
+                AUTHOR=$(append_csv_param "${AUTHOR}" "@me")
             fi
             ;;
         --created-at ) # option_test([""])
