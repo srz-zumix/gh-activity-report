@@ -65,7 +65,7 @@ account filter: Default --auther @me, if not specified bellow
                 Account filters can be specified multiple times.
                 In that case, it becomes an OR condition
   --assignee         [name]             Filter by assignee
-  --author           [name]             Filter by author
+  --author           [name|@all]        Filter by author (@all to disable default @me filter)
   --commenter        [name]             Filter based on comments by user
   --involves         [name]             Filter based on involvement of user
   --mentions         [name]             Filter based on user mentions

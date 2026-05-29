@@ -115,7 +115,7 @@ account filter: Default --author @me, if not specified below
                 Account filters can be specified multiple times.
                 In that case, it becomes an OR condition
   --assignee         [name]             Filter by assignee
-  --author           [name]             Filter by author
+  --author           [name|@all]        Filter by author (@all to disable default @me filter)
   --commenter        [name]             Filter based on comments by user
   --involves         [name]             Filter based on involvement of user
   --mentions         [name]             Filter based on user mentions
@@ -208,6 +208,7 @@ parse_params() {
     FORMAT=
     INPUT_BYPASS_OPTIONS=()
     DRYRUN=
+    AUTHOR_ALL=
     HOSTNAME="${GH_HOST:-github.com}"
 
     while :; do
@@ -217,10 +218,14 @@ parse_params() {
             if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
             ASSIGNEE=$(append_csv_param "${ASSIGNEE}" "${NAME_-}")
             ;;
-        --author ) # option_test(["", "@me"])
+        --author ) # option_test(["", "@me", "@all"])
             NAME_="${2-}"
             if test_empty_or_option_param "${NAME_-}"; then shift; else NAME_="@me"; fi
-            AUTHOR=$(append_csv_param "${AUTHOR}" "${NAME_-}")
+            if [ "${NAME_}" = "@all" ]; then
+                AUTHOR_ALL="true"
+            else
+                AUTHOR=$(append_csv_param "${AUTHOR}" "${NAME_-}")
+            fi
             ;;
         --created-at ) # option_test([""])
             PRS_DATE_FILTER="created"
@@ -496,7 +501,7 @@ if [ -n "${DATE_QUERY}" ]; then
 fi
 
 # account filter
-if [ -z "${AUTHOR}${ASSIGNEE}${INVOLVES}${MENTIONS}${COMMENTER}${REVIEW_REQUESTED}${REVIEWED_BY}" ]; then
+if [ -z "${AUTHOR}${ASSIGNEE}${INVOLVES}${MENTIONS}${COMMENTER}${REVIEW_REQUESTED}${REVIEWED_BY}" ] && [ -z "${AUTHOR_ALL}" ]; then
     AUTHOR="@me"
 fi
 
